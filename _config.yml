@@ -1,0 +1,51 @@
+# Site settings
+title: Another Blog
+url: "http://goodgodgd.github.io"    # the protocol and hostname of your site, eg. `http://laobubu.github.io`
+baseurl: "/ian-flow" # the prefix of your site uri, eg. `"/jekyll-theme-EasyBook"` or empty string `""`
+#timezone: Asia/Seoul
+description: >
+  flow of ian's mind
+
+# Your information
+email: goodgodgd@yonsei.ac.kr
+author: ian choi
+profile: an enthuasitic researcher
+github_username: goodgodgd
+profile_links:
+  Email: "mailto:goodgodgd@yonsei.ac.kr"
+  GitHub: "https://gitlab.com/goodgodgd/ian-flow"
+  # You can add more profile links above, or edit _includes/sidebar.html 
+
+excerpt_separator: <!--more-->
+
+header:
+  links:             # Links on the header. Link to in-site page with a slash as prefix
+    About: /about/
+    Category: /category/
+
+permalink: /archivers/:title
+plugins:
+ - jekyll-paginate
+ - jekyll-gist
+ - jemoji
+
+# Build settings
+paginate: 5         # posts per page
+paginate_path: "page:num"
+
+highlighter: rouge
+markdown: kramdown
+
+# https://jekyllrb.com/docs/configuration/#precedence
+defaults:
+  -
+    scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  math_engine: mathjax
