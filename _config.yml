@@ -1,5 +1,5 @@
 # Site settings
-title: Another Blog
+title: IanFlow
 url: "http://goodgodgd.github.io"    # the protocol and hostname of your site, eg. `http://laobubu.github.io`
 baseurl: "/ian-flow" # the prefix of your site uri, eg. `"/jekyll-theme-EasyBook"` or empty string `""`
 #timezone: Asia/Seoul
@@ -8,7 +8,7 @@ description: >
 
 # Your information
 email: goodgodgd@yonsei.ac.kr
-author: ian choi
+author: Hyukdoo Choi
 profile: an enthuasitic researcher
 github_username: goodgodgd
 profile_links:
