@@ -1,6 +1,6 @@
 # Site settings
 title: IanFlow
-url: "https://goodgodgd.gitlab.io"    # the protocol and hostname of your site, eg. `http://laobubu.github.io`
+url: "https://goodgodgd.github.io"    # the protocol and hostname of your site, eg. `http://laobubu.github.io`
 baseurl: "/ian-flow" # the prefix of your site uri, eg. `"/jekyll-theme-EasyBook"` or empty string `""`
 #timezone: Asia/Seoul
 description: >
@@ -10,10 +10,10 @@ description: >
 email: goodgodgd@yonsei.ac.kr
 author: Hyukdoo Choi
 profile: an enthuasitic researcher
-gitlab_username: goodgodgd
+github_username: goodgodgd
 profile_links:
   Email: "mailto:goodgodgd@yonsei.ac.kr"
-  GitLab: "https://gitlab.com/goodgodgd/ian-flow"
+  GitHub: "https://github.com/goodgodgd/ian-flow"
   # You can add more profile links above, or edit _includes/sidebar.html 
 
 excerpt_separator: <!--more-->

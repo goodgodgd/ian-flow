@@ -42,8 +42,8 @@ github 등에서 사용하는 마크다운을 정적 사이트로 변환해 주�
 
 ### GitLab 저장소 만들기
 
-GitHub을 써봤다면 GitLab도 비슷하게 사용하면 된다. 계정을 만들고 아래 그림처럼 나오면 `New Project`를 누르고 시키는대로 하면 된다. 프로젝트 명을 `blog` 라고 지으면 블로그 url이 `[username]/github.io` 로 나오고 다르게 지으면 `[username]/github.io/[project name]` 으로 나온다. 나같은 경우는 `https://goodgodgd.gitlab.io/ian-flow/`가 되었다.
-![gitlab new project](/ian-flow/assets/2019-01-06-first-step-to-jekyll/gitlab-new-project.png)
+GitHub을 써봤다면 GitLab도 비슷하게 사용하면 된다. 계정을 만들고 아래 그림처럼 나오면 `New Project`를 누르고 시키는대로 하면 된다. 프로젝트 명을 `blog` 라고 지으면 블로그 url이 `[username]/github.io` 로 나오고 다르게 지으면 `[username]/github.io/[project name]` 으로 나온다. 나같은 경우는 `https://goodgodgd.github.io/ian-flow/`가 되었다.
+![github new project](/ian-flow/assets/2019-01-06-first-step-to-jekyll/github-new-project.png)
 
 ### 제일 어려운 건? 테마 선택!
 
