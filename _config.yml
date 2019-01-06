@@ -1,6 +1,6 @@
 # Site settings
 title: IanFlow
-url: "http://goodgodgd.gitlab.io"    # the protocol and hostname of your site, eg. `http://laobubu.github.io`
+url: "https://goodgodgd.gitlab.io"    # the protocol and hostname of your site, eg. `http://laobubu.github.io`
 baseurl: "/ian-flow" # the prefix of your site uri, eg. `"/jekyll-theme-EasyBook"` or empty string `""`
 #timezone: Asia/Seoul
 description: >
