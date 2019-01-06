@@ -10,10 +10,10 @@ description: >
 email: goodgodgd@yonsei.ac.kr
 author: Hyukdoo Choi
 profile: an enthuasitic researcher
-github_username: goodgodgd
+gitlab_username: goodgodgd
 profile_links:
   Email: "mailto:goodgodgd@yonsei.ac.kr"
-  GitHub: "https://gitlab.com/goodgodgd/ian-flow"
+  GitLab: "https://gitlab.com/goodgodgd/ian-flow"
   # You can add more profile links above, or edit _includes/sidebar.html 
 
 excerpt_separator: <!--more-->
