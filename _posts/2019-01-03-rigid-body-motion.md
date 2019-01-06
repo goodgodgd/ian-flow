@@ -3,7 +3,6 @@ layout: post
 title:  "Representation of a Three-Dimensional Moving Scene"
 date:   2019-01-03 09:00:13
 categories: slam-2018-fall
-permalink: /ian-flow/posts/slam-2018-fall/rigid-body-motion
 ---
 
 # Representation of a Three-Dimensional Moving Scene
