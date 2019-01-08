@@ -15,8 +15,8 @@ Reference: An Invitation to 3-D vision, Chapter 2.
 |         | Rotation | Transformation |
 |:--------|:--------|:--------|
 | vector form | $ w \in \mathbb{R}^3 $ | $ \xi = \begin{bmatrix} w & v \end{bmatrix}^T \in \mathbb{R}^6 $<br>: twist coordinates |
-| exponential coordinates | $ \hat{w} \in so(3) \subset \mathbb{R}^{3 \times 3} $  $$ \widehat{w} \doteq  \begin{bmatrix} 0 & -w_3 & w_2 \\ w_3 & 0 & -w_1 \\ -w_2 & w_1 & 0 \end{bmatrix} $$ | $ \hat{\xi} \in se(3) \subset \mathbb{R}^{3 \times 3} $: twist  $$ \widehat{\xi} \doteq \begin{bmatrix} \widehat{w} & v \\ 0 & 0 \end{bmatrix} $$ |
-| matrix form | $ R = e^{\hat{w}} \in SO(3) \subset \mathbb{R}^{3 \times 3} $ | $ T = e^{\hat{\xi}} \in SE(3) \subset \mathbb{R}^{3 \times 3} $ |
+| exponential coordinates | $ \hat{w} \in so(3) \subset \mathbb{R}^{3 \times 3} $  $$ \widehat{w} \doteq  \begin{bmatrix} 0 & -w_3 & w_2 \\ w_3 & 0 & -w_1 \\ -w_2 & w_1 & 0 \end{bmatrix} $$ | $ \hat{\xi} \in se(3) \subset \mathbb{R}^{4 \times 4} $: twist  $$ \widehat{\xi} \doteq \begin{bmatrix} \widehat{w} & v \\ 0 & 0 \end{bmatrix} $$ |
+| matrix form | $ R = e^{\hat{w}} \in SO(3) \subset \mathbb{R}^{3 \times 3} $ | $ T = e^{\hat{\xi}} \in SE(3) \subset \mathbb{R}^{4 \times 4} $ |
 | exponential map | $$ e^{\widehat{w}} = I + {\widehat{w} \over \begin{Vmatrix} w \end{Vmatrix}} sin(\begin{Vmatrix} w \end{Vmatrix}) $$ $$ + {\widehat{w}^2 \over \begin{Vmatrix} w \end{Vmatrix}^2} (1 - cos(\begin{Vmatrix} w \end{Vmatrix}) $$ | $$ e^{\widehat{\xi}t}  = \begin{bmatrix} e^{\widehat{w}} & \left( I - e^{\widehat{w}} \right) \widehat{w} v + w \widehat{w}^T v \\ 0 & 1 \end{bmatrix} $$ |
 
 
@@ -300,7 +300,7 @@ From the above definition, $ SE(3) $ forms a *group*.
 $$
 \begin{align}
 & \forall g_1, g_2, g \in SE(3), \\\\
-& \bar{g}_1 \bar{g}_1 = 
+& \bar{g}_1 \bar{g}_2 = 
 \begin{bmatrix} R_1 & T_1 \\ 0 & 1 \end{bmatrix}
 \begin{bmatrix} R_2 & T_2 \\ 0 & 1 \end{bmatrix}
 = \begin{bmatrix} R_1R_2 & R_1T_2 + T_1 \\ 0 & 1 \end{bmatrix}
@@ -396,8 +396,11 @@ $$
 
 The exponential map defines a transformation from the space $se(3)$ to $SE(3)$,
 
-$$ exp: se(3) \to SE(3);  \quad \widehat{\xi} \mapsto e^{\widehat{\xi}t} $$
+$$
+exp: se(3) \to SE(3);  \quad \widehat{\xi} \mapsto e^{\widehat{\xi}t}
+$$
 
 The twist $ \widehat{\xi} \in se(3) $ is also called the exponential coordinates for $SE(3)$
 
 > Theorem 2.11 (**Logarithm** of $SE(3)$). For any $ g \in SE(3) $, there exist  (not necessarily unique) twist coordinates $ \xi \in (v, w) $ such that $ g = exp(\hat{\xi}) $. We denote the inverse to the exponential map by $ \hat{\xi} = log(g) $
+
