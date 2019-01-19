@@ -1,12 +1,12 @@
 ---
 layout: post
-title:  "Docker에서 ORB-SLAM 빌드하기"
+title:  "Docker에서 ORB-SLAM 실행하기"
 date:   2019-01-19 09:00:01
 categories: myflow
 
 ---
 
-# Docker에서 ORB-SLAM 돌려보기
+# Docker에서 ORB-SLAM 실행하기
 
 ## Motivation
 
@@ -14,9 +14,9 @@ categories: myflow
 
 ## Docker 란?
 나처럼 무식한 사람이 어줍잖게 떠드는 것 보다는 이미 훌륭한 분들이 잘 정리한 블로그를 보는게 나을듯 하다.
-[초보를 위한 도커 안내서 - 도커란 무엇인가?](https://subicura.com/2017/01/19/docker-guide-for-beginners-1.html)
-[도커란 무엇인가?(WHAT IS DOCKER?)](http://avilos.codes/infra-management/virtualization-platform/docker/what-is-docker/)
-[도커란 무엇인가? / Docker 컨테이너 / Docker 이미지 / LXC / 가상화](http://dev.youngkyu.kr/32)
+- [초보를 위한 도커 안내서 - 도커란 무엇인가?](https://subicura.com/2017/01/19/docker-guide-for-beginners-1.html)
+- [도커란 무엇인가?(WHAT IS DOCKER?)](http://avilos.codes/infra-management/virtualization-platform/docker/what-is-docker/)
+- [도커란 무엇인가? / Docker 컨테이너 / Docker 이미지 / LXC / 가상화](http://dev.youngkyu.kr/32)
 
 한 줄 요약: 엄청 가벼운 가상 머신 (처럼 느껴지는 무엇?)
 핵심 개념:
