@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "How to use g2o library (nonlinear optimization library)"
-date:   2019-01-06 09:00:01
+date:   2019-01-20 09:00:01
 categories: jekyll
 ---
 
