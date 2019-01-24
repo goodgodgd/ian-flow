@@ -39,7 +39,7 @@ nonlinear graph optimization을 해주는 라이브러리는 이것 말고도 [G
 - gtsam: 2017-08
 - mrpt: 2018-04
 
-세 라이브러리 모두 마지막 릴리즈는 좀 시간이 지났지만 꾸준히 자잘한 버그나 새로운 환경에 적응하기 위핸 micro commit은 올라오고 있는 듯 하다.
+세 라이브러리 모두 마지막 릴리즈는 좀 시간이 지났지만 꾸준히 자잘한 버그나 새로운 환경에 적응하기 위한 micro commit은 올라오고 있는 듯 하다.
 
 그렇다면 성능은? 구글링을 해보면 g2o와 gtsam을 비교한 자료가 있긴 하다.
 - https://www.cnblogs.com/reinforce/p/5510539.html
@@ -106,7 +106,7 @@ g2o를 사용하는 방법을 예제를 통해 설명한다. 단순히 예제 �
 
 `g2o/solver/` 아래 헤더들은 선형식으로 근사화된 문제를 풀 수 있는 세 가지 알고리즘을 가지고 있는데 `dense`, `csparse`, `cholmod` 이다. 이 중 자신이 사용할 방법을 include 하면 된다. `optimization_algorithm_xx.h`도 마찬가지다. 선택사항에 대한 내용은 뒤에 설명한다.
 
-`g2o/types` 아래에는 SLAM이나 BA에서 자주 사용되는 상태 표현들이 사용하기 쉽게 클래스로 정의되어 있다. 대표적으로 본 예제에서 3차원 자세를 표현하기 위해 사용한 `SE3Quat`이다. `g2o`는 2차원과 3차원의 자세와 좌표 등을 표현 할 수 있는 다양한 자료형을 제공한다.
+`g2o/types` 아래에는 SLAM이나 BA에서 자주 사용되는 상태 표현들이 사용하기 쉽게 클래스로 정의되어 있다. 대표적으로 3차원 pose를 표현하는 `SE3Quat` 등이 있다. `g2o`는 2차원과 3차원의 자세와 좌표 등을 표현 할 수 있는 다양한 자료형을 제공한다.
 
 `G2O_USE_TYPE_GROUP(slam3d);`는 그래프를 `*.g2o` 파일로부터 읽어올 때 필수적이다. `g2o`는 그래프 상태를 `*.g2o` 파일로 입출력 할 수 있는데 본 예제에서는 출력만 하므로 필요하진 않다.
 
@@ -132,7 +132,7 @@ g2o를 사용하는데 있어서 가장 난해한 부분이다. Optimizer 객체
 
 ---
 #### 전략 패턴
-```
+```cpp
 class AlgoBase { virtual void func(int a) = 0; }
 class AlgoAA: public AlgoBase { virtual void func(int a) { printf("printf %d", a); } }
 class AlgoBB: public AlgoBase { virtual void func(int a) { cout << "cout " << a; } }
@@ -196,7 +196,7 @@ optimizer->setVerbose(true);
 ```
 
 g2o는 nonlinear optimization library이기 때문에 이제 nonlinear solver를 만들어야 한다. nonlinear optimization을 푸는 방법은 역시나 [다크프로그래머](https://darkpgmr.tistory.com/142)님께서 잘 정리하셨다. 이론적인 내용은 링크를 들어가서 보고 여기서는 코드에 집중하겠다. 예제에서는 `OptimizationAlgorithmLevenberg`을 사용하였는데 이것은 `g2o::OptimizationAlgorithm`의 자식 클래스이고 다른 옵션들도 있다.
-- `OptimizationAlgorithmGaussNewton`: *Gauss-Newton method*를 구현한 클래스다.
+- `OptimizationAlgorithmGaussNewton`: *Gauss-Newton method* 를 구현한 클래스다.
 - `OptimizationAlgorithmLevenberg`: *Levenberg–Marquardt algorithm* 을 구현한 것이고 가장 일반적으로 사용된다.
 - `StructureOnlySolver` 같은 다른 옵션도 있지만 위 두개만으로 충분한 것 같다.
 
@@ -212,7 +212,7 @@ g2o는 nonlinear optimization library이기 때문에 이제 nonlinear solver를
 g2o에서는 6자유도를 가진 3차원 pose를 `SE3Quat`이라는 클래스로 표현한다. 3차원 pose를 (x, y, z, qx, qy, qz) 즉 3차원 좌표와 quaternion의 앞 3자리로 표현한다. qw는 나머지 세 개를 통해 구할 수 있기 때문에 생략한다.  
 `SE3Quat`는 `Eigen::Quaterniond`와 `Eigen::Vector3d` 변수로 초기화 할 수 있고 이를 `addPoseVertex()` 함수를 통해 optimizer에 추가된다.  
 함수 안에서 3차원 pose를 표현하는 `g2o::SE3Quat& pose` 정보를 이용하여 pose vertex 변수인 `g2o::VertexSE3* v_se3`의 초기값을 지정하고 `optimizer->addVertex(v_se3);`하여 optimizer에 vertex를 추가한다.  
-`gt_poses`는 추후 edge를 만들기 위해 모든 vertex pose를 저장하는 vector 이다.
+`gt_poses`는 추후 edge를 만들기 위해 모든 vertex pose를 저장하는 `std::vector<g2o::SE3Quat>` 이다.
 
 ```cpp
 int main()
@@ -290,7 +290,7 @@ int main()
 vertex에 값이 없더라도 vertex 사이의 관계를 edge를 통해 정의해주면 최적화를 통해 vertex state를 복원할 수 있다. 다음은 pose 사이의 상대 pose를 계산하여 edge를 만들고 추가하는 코드다.  
 처음엔 for문에서 연속된 두 pose 사이의 관계를 입력하고 그 다음엔 loop closing을 만들기 위해 pose 1과 pose N-1 사이의 관계로 edge로 추가해주었다. 
 `addEdgePosePose`는 edge를 추가하는 함수인데 내부에서 `g2o::EdgeSE3` 객체를 생성하며 optmizer에 추가한다.  
-`g2o::EdgeSE3`는 이름 그대로 `SE3Quat` 사이의 관계를 `SE3Quat`형식으로 측정한 값을 가진 객체이다. 이를 `optimizer->addEdge(edge);` 함수를 통해 추가하면 두 vertex 사이에 edge가 추가된다.
+`g2o::EdgeSE3`는 전역 pose (`SE3Quat`) 사이의 관계를 상대 pose (`SE3Quat`)로 측정한 값을 가진 객체이다. 이를 `optimizer->addEdge(edge);` 함수를 통해 추가하면 두 vertex 사이에 edge가 추가된다.
 
 ```cpp
 int main()
@@ -327,7 +327,7 @@ void addEdgePosePose(g2o::SparseOptimizer* optimizer, int id0, int id1, g2o::SE3
 
 optimizer에 vertex와 edge를 추가했다면 그래프는 만들어진 것이다. 이제 vertex parameter를 최적화 하면 된다. 그리고 그 전후의 결과를 파일로 출력하여 비교해 보자.  
 최적화를 하기 전에 반드시 `initializeOptimization()` 함수를 실행해야 한다. `g2o::SparseOptmizer` 클래스에는 `load()`, `save()` 함수가 있는데 vertex와 edge 정보를 파일로 입출력할 수 있는 함수다. 여기서는 코드에서 그래프를 구성하기 때문에 `save()`를 통해 만들어진 그래프를 저장한다.  
-`optimizer->optimize(100);`를 실행하면 실제 최적화를 위한 연산을 한다. 입력으로 넣는 숫자는 최대 iteration 수다. 그냥 넉넉하게 크게 줘봤다.
+`optimizer->optimize(100);`를 실행하면 실제 최적화를 위한 연산을 한다. 입력으로 넣은 100은 최대 iteration 수다.
 
 ```cpp
 int main()
@@ -350,7 +350,7 @@ int main()
 
 ### 3.5 Result
 
-실행 결과는 다음과 같다. 실제 실행시에는 더 많은 정보가 뜨는데 줄이 넘어가서 일부만 붙였다. `chi2`는 에러를 나타내고 `time`은 수행 시간을 의미한다. 27번째 반복에서 에러가 0으로 수렴하여 자동종료 되었다.
+실행 결과는 다음과 같다. 실제 실행시에는 더 많은 정보가 뜨는데 줄이 넘어가서 일부만 붙였다. `chi2`는 에러를 나타내고 `time`은 수행 시간을 의미한다. 58번째 반복에서 에러가 0으로 수렴하여 자동종료 되었다.
 
 output
 ```
@@ -367,7 +367,7 @@ iteration= 58	 chi2= 0.000000	 time= 0.00219608
 
 다음은 최적화를 하기 전의 그래프 상태와 후의 그래프 상태를 텍스트로 출력한 것이다. 출력형식은 다음과 같다.  
 - `VERTEX_SE3:QUAT`: `SE3Quat`을 출력한 것으로 [vertex_id, x, y, z, qx, qy, qz, qw] 이렇게 8개 숫자로 표현한다.
-- `EDGE_SE3:QUAT`: `EdgeSE3`를 출력한 것으로 [vertex_0 vertex_1, x, y, z, qx, qy, qz, qw, [upper triangle of information matrx]] 형식으로 표현된다. edge는 information matrix와 함께 출력되는데 pose가 6차원이므로 information matrix는 6x6 matrix이다. 그런데 36개의 숫자를 쓰기는 너무 양이 많고 어차피 information matrix는 symmetric 하기 때문에 upper triangle에 해당하는 21개의 숫자만 출력한다.
+- `EDGE_SE3:QUAT`: `EdgeSE3`를 출력한 것으로 [vertex0_id, vertex1_id, x, y, z, qx, qy, qz, qw, [upper triangle of information matrx]] 형식으로 표현된다. edge는 information matrix와 함께 출력되는데 pose가 6차원이므로 information matrix는 6x6 matrix이다. 그런데 36개의 숫자를 쓰기는 너무 양이 많고 어차피 information matrix는 symmetric 하기 때문에 upper triangle에 해당하는 21개의 숫자만 출력한다.
 
 `before_opt.g2o`를 보면 2번부터 9번까지의 vertex가 모두 0으로 초기화 된 것을 볼 수 있다.
 ```
