@@ -1,15 +1,15 @@
 ---
 layout: post
-title:  "How to use g2o library (nonlinear optimization library)"
+title:  "How to use g2o (nonlinear optimization library)"
 date:   2019-01-20 09:00:01
 categories: jekyll
 ---
 
 
-# Tutorial on g2o (nonlinear optimization library)
+# How to use g2o (nonlinear optimization library)
 
-g2o GitHub: https://github.com/RainerKuemmerle/g2o
-테스트 환경: Ubuntu 18.04 with QtCreator
+g2o GitHub: https://github.com/RainerKuemmerle/g2o  
+테스트 환경: Ubuntu 18.04 with QtCreator  
 
 ## 1. Introduction to g2o
 
@@ -17,7 +17,7 @@ g2o GitHub: https://github.com/RainerKuemmerle/g2o
 
 GitHub을 보면 이렇게 소개되어 있다.
 
-> g2o - General Graph Optimization
+> g2o - General Graph Optimization  
 > g2o is an open-source C++ framework for optimizing graph-based nonlinear error functions. g2o has been designed to be easily extensible to a wide range of problems and a new problem typically can be specified in a few lines of code. The current implementation provides solutions to several variants of SLAM and BA.
 
 한 줄 요약: C++ based nonlinear graph optimization library for SLAM and BA  
@@ -134,19 +134,19 @@ g2o를 사용하는데 있어서 가장 난해한 부분이다. Optimizer 객체
 #### 전략 패턴
 ```
 class AlgoBase { virtual void func(int a) = 0; }
-class AlgoAA { virtual void func(int a) { printf("printf %d", a); } }
-class AlgoBB { virtual void func(int a) { cout << "cout " << a; } }
+class AlgoAA: public AlgoBase { virtual void func(int a) { printf("printf %d", a); } }
+class AlgoBB: public AlgoBase { virtual void func(int a) { cout << "cout " << a; } }
 class Foo{
 	AlgoBase* algo;
     setAlgo(AlgoBase* _algo) { algo = _algo; }
-    doAlgo(int a) { algo->algo(a); }
+    doSomthing(int a) { algo->func(a); }
 }
 int main() {
     Foo* foo = new Foo;
-    AlgoBase* aa = AlgoAA;
+    AlgoBase* aa = new AlgoAA;
     foo->setAlgo(aa);
     foo->doSomthing(3);	// -> print 3
-    AlgoBase* bb = AlgoBB;
+    AlgoBase* bb = new AlgoBB;
     foo->setAlgo(bb);
     foo->doSomthing(3);	// -> cout 3    
 }
