@@ -1,0 +1,172 @@
+---
+layout: post
+title:  "How to use g2o #2 (nonlinear optimization library)"
+date:   2019-01-29 09:00:01
+categories: slam-2018-fall
+---
+
+
+# How to use g2o #2 (vertex and edge types)
+
+## Abstract
+
+[저번 포스트](https://goodgodgd.github.io/ian-flow/archivers/how-to-use-g2o)에서는 g2o에 대해 전반적으로 설명하면서 optimizer를 네 단계로 생성하는 방법과 단계별로 선택가능한 옵션에 대해서 알아봤다. **이번 포스트에서는 graph를 구성하는 vertex와 edge 타입**들을 자세히 살펴보고자 한다.  
+
+## 1. Vertex and Edge Types of g2o
+
+[g2o repository](https://github.com/RainerKuemmerle/g2o)를 보면 `g2o/g2o/types` 아래에 풀고자 하는 문제에 따라 타입들을 잘 분류해 놓았다. 3D SLAM을 하고 싶다면 `g2o/g2o/types/slam3d` 폴더를 보면 되고 Bundle Adjustment (BA)를 하고 싶다면 `g2o/g2o/types/sba`를 보면 된다. 그 외에도 다양한 문제에 대한 타입들이 존재하는데 여기서 다루고자 하는것은 주로 3D SLAM과 BA에 사용되는 타입들이다. 그래서 여기서도 vertex 따로 edge 따로 설명하지 않고 문제에 따른 vertex와 edge를 함께 설명하고자 한다.
+
+### 1.1 How to understand vertex and edge types
+
+g2o는 매뉴얼이 없기 때문에 원하는 타입을 `g2o/g2o/types` 폴더를 뒤져 찾아야 한다. 그래도 네이밍과 상속받는 부모클래스를 보면 각 타입의 역할을 추정할 수 있다. 예를 들어 `g2o/g2o/types/slam3d` 안에는 `se3quat.h`, `vertex_se3.h`, `edge_se3.h`가 있는데 각각 `SE3Quat`, `VertexSE3`, `EdgeSE3` 라는 클래스 선언을 담고 있다. 이 세개 클래스를 보면서 g2o의 타입 선언 방식에 대해 이해해보자. 우선 클래스 선언들을 보자.
+
+```cpp
+// se3quat.h
+class G2O_TYPES_SLAM3D_API SE3Quat
+// vertex_se3.h
+class G2O_TYPES_SLAM3D_API VertexSE3 : public BaseVertex<6, Isometry3>
+// edge_se3.h
+class G2O_TYPES_SLAM3D_API EdgeSE3 : public BaseBinaryEdge<6, Isometry3, VertexSE3, VertexSE3>
+```
+
+중간에 있는 `G2O_TYPES_SLAM3D_API`는 무시하고 상속 클래스를 보자. `SE3Quat`은 상위 클래스가 없다. 그냥 SE3 pose를 표현하기 위해 만든 클래스다. `VertexSE3` 같은 경우는 `BaseVertex<6, Isometry3>`를 상속 받았다. vertex에도 종류가 여러가지가 있을테니 이들의 공통적인 인터페이스를 선언하는 상위 클래스가 있을것이고 그것이 `BaseVertex`이다. `BaseVertex`의 선언을 보자.
+
+```cpp
+template <int D, typename T>
+class BaseVertex : public OptimizableGraph::Vertex
+```
+
+템플릿 인자 중 D는 dimension으로 vertex가 가진 parameter의 개수를 말하는데 6자유도 pose를 표현해야 하므로 D=6 이다. T는 내부적으로 이를 저장할 타입인데 일반적인 transformation을 표현할 수 있는 `Eigen::Isometry3`를 사용하였다.  
+`EdgeSE3` 또한 Edge의 인터페이스를 정의한 `BinaryEdge` 클래스를 상속 받았는데 `BinaryEdge`의 선언도 확인해보자.
+
+```cpp
+template <int D, typename E, typename VertexXi, typename VertexXj>
+class BaseBinaryEdge : public BaseEdge<D, E>
+```
+
+D와 E는 Edge에 담을 정보의 dimension과 저장 타입이다. 예를 들어 `EdgeSE3`에 담을 정보는 상대적인 SE3 pose 이기 때문에 `VertexSE3`와 마찬가지로 D=6, E=Eigen::Isometry3 이다. `VertexXi`는 edge가 시작하는 vertex 타입, `VertexXj`는 edge가 향하는 vertex 타입이다. 그래서 `EdgeSE3`는 `VertexSE3` 사이를 잇는 edge이기 때문에 `BaseBinaryEdge<6, Isometry3, VertexSE3, VertexSE3>`를 상속받는 것이다.  
+이제 보는 방법을 알았으니 본격적으로 어떤 타입들이 있는지 알아보자.
+
+### 1.2 SLAM 3D types
+
+`g2o/g2o/types/slam3d`에는 3D SLAM을 위한 여러가지 타입들이 있다. 여기서는 그중 중요한 몇 가지만 보고자 한다. 3D SLAM에 필요한 타입은 point landmark를 사용한다고 했을 때 SE3 pose와 XYZ point가 vertex가 될 수 있고 edge는 pose - pose 사이, pose - point 사이 두 가지가 필요하다. 실제 선언된 클래스들을 보자.
+
+```cpp
+// se3quat.h
+class SE3Quat
+
+// vertex_se3.h
+class VertexSE3 : public BaseVertex<6, Isometry3>
+// vertex_pointxyz.h
+class VertexPointXYZ : public BaseVertex<3, Vector3>
+
+// edge_se3.h
+class EdgeSE3 : public BaseBinaryEdge<6, Isometry3, VertexSE3, VertexSE3>
+// edge_se3_pointxyz.h
+class EdgeSE3PointXYZ : public BaseBinaryEdge<3, Vector3, VertexSE3, VertexPointXYZ>
+// edge_se3_pointxyz_depth.h
+class EdgeSE3PointXYZDepth : public BaseBinaryEdge<3, Vector3, VertexSE3, VertexPointXYZ>
+// edge_se3_pointxyz_disparity.h
+class EdgeSE3PointXYZDisparity : public BaseBinaryEdge<3, Vector3, VertexSE3, VertexPointXYZ>
+
+// parameter_se3_offset.h
+class ParameterSE3Offset: public Parameter
+// parameter_camera.cpp
+class ParameterCamera: public ParameterSE3Offset
+```
+
+vertex는 예상대로 pose와 point vertex를 나타내는 `VertexSE3`, `VertexPointXYZ`가 선언되어 있다. graph에 vertex를 추가하는 함수를 다음과 같이 만들었다. 전체 예제 코드는 [이곳](https://github.com/goodgodgd/sch-seminars/tree/master/slam-2018-fall/GraphOpt/G2oExample)에서 확인할 수 있다.  
+vertex의 parameter 초기 값은 `setEstimate()`라는 함수로 지정할 수 있다. SE3 pose는 같은 폴더에 선언된 `g2o::SE3Quat` 클래스로 받아오고 XYZ point는 `Eigen::Vector3d`로 받아온다. 초기값을 변하지 않는 상수로 고정시키려면 `setFixed()`라는 함수를 이용하면 된다.
+
+```cpp
+void Slam3DConstructor::addPoseVertex(g2o::SE3Quat *pose, bool set_fixed)
+{
+    if(pose)
+        print_se3(*pose, "[addPoseVertex] ");
+    else
+        assert(!set_fixed);
+
+    g2o::VertexSE3* v_se3 = new g2o::VertexSE3;
+    v_se3->setId(getNewID());
+    if(pose)
+        v_se3->setEstimate(*pose);
+    v_se3->setFixed(set_fixed);
+    optimizer->addVertex(v_se3);
+}
+
+void Slam3DConstructor::addPoint3DVertex(Eigen::Vector3d* pt, bool set_fixed)
+{
+    if(pt)
+        print_vec3(*pt, "[addPoint3DVertex]: ", true);
+    else
+        assert(!set_fixed);
+
+    g2o::VertexPointXYZ* v_pt3d = new g2o::VertexPointXYZ;
+    v_pt3d->setId(getNewID());
+    v_pt3d->setFixed(set_fixed);
+    if(pt)
+        v_pt3d->setEstimate(*pt);
+    optimizer->addVertex(v_pt3d);
+}
+```
+
+edge는 비슷한 타입들이 여러가지가 있다. pose-to-pose 를 연결하는 edge는 `EdgeSE3` 하나로 나타내는데 pose-to-point 를 연결하는 edge는 `EdgeSE3PointXYZ`, `EdgeSE3PointXYZDepth`, `EdgeSE3PointXYZDisparity` 세 가지나 있다. 이들의 차이점에 대해서는 명확한 문서가 없기 때문에 내가 코드를 보면서 추정한 내용을 쓰겠다.  
+이름이 달라서 뭔가 다른 걸 표현하나 싶어서 자세히 봤는데 이들이 표현하는 것은 모두 `SE3Quat` pose에서 바라본 `Eigen::Vector3d` point 좌표가 맞는듯 하다. 다만 차이점은 error function과 jacobian이 다른 듯 하다. 그냥 `XYZ`로만 표현한 점은 허공에서 3차원 어느 방향으로도 조절이 가능한 점인데 `XYZDepth`로 표현한 점은 특정한 `SE3Quat` pose에서 depth 카메라를 이용해 본 3차원 좌표기 때문에 움직일 수 있는 방향이 depth 방향 밖에 없다. depth 카메라에서 특정 픽셀을 통해 어떤 점을 보게 되면 (calibration이 잘되어 있다는 가정하에서) 픽셀 좌표 자체에는 에러가 있을 수 없으므로 오차는 오직 depth에만 의존하게 된다.  
+`EdgeSE3PointXYZ`로 연결된 `VertexPointXYZ`를 최적화 할때는 3차원 아무 방향으로나 에러를 최소화 하도록 파라미터(좌표)를 조절하면 된다. 반면에 `EdgeSE3PointXYZDepth`로 연결된 `VertexPointXYZ`를 최적화 할때는 반대쪽에 연결된 pose를 기준으로 depth만 최적화가 가능하다. 이런 것까지 고려해서 라이브러리를 만들다니 정말 대다나다. ~~(문서도 이렇게 좀 꼼꼼히 만들지...)~~  
+마찬가지로 `EdgeSE3PointXYZDisparity`는 스테레오 카메라에서 측정한 3차원 좌표를 위해 만든 edge 타입이다. 스테레오에서도 pixel 방향에 의해 좌표의 방향은 정해지고 disparity 에 의해서 depth가 정해지므로 disparity에 따라 변하는 point 방향으로만 최적화를 할 수가 있다.  
+다음은 edge를 추가하는 함수를 다음과 같이 만들었다. 마찬가지로 전체 예제 코드는 [이곳](https://github.com/goodgodgd/sch-seminars/tree/master/slam-2018-fall/GraphOpt/G2oExample)에서 볼 수 있다.  
+
+```cpp
+void Slam3DConstructor::addEdgePosePose(int id0, int id1, const g2o::SE3Quat &relpose)
+{
+    std::cout << "[addEdgePosePose] id0=" << id0 << ", id1=" << id1;
+    print_se3(relpose, ", ");
+    g2o::EdgeSE3* edge = new g2o::EdgeSE3;
+    edge->setVertex(0, optimizer->vertices().find(id0)->second);
+    edge->setVertex(1, optimizer->vertices().find(id1)->second);
+    edge->setMeasurement(relpose);
+    Eigen::MatrixXd info_matrix = Eigen::MatrixXd::Identity(6,6);
+    for(int i=0; i<3; i++)
+        info_matrix(i, i) = 1. / config.tran_noise(i);
+    for(int i=0; i<3; i++)
+        info_matrix(3+i, 3+i) = 1. / config.quat_noise(i);
+    edge->setInformation(info_matrix);
+    optimizer->addEdge(edge);
+}
+
+void Slam3DConstructor::addEdgePosePoint(int poseid, int ptid, const Eigen::Vector3d& relpt)
+{
+    std::cout << "[addEdgePosePoint] poseid=" << poseid << ", ptid=" << ptid;
+    print_vec3(relpt, ", relpt", true);
+
+    g2o::EdgeSE3PointXYZ* edge = new g2o::EdgeSE3PointXYZ;
+    edge->setVertex(0, optimizer->vertices().find(poseid)->second);
+    edge->setVertex(1, optimizer->vertices().find(ptid)->second);
+    edge->setMeasurement(relpt);
+    Eigen::MatrixXd info_matrix = Eigen::MatrixXd::Identity(3,3);
+    for(int i=0; i<3; i++)
+        info_matrix(i, i) = 1. / config.point_noise(i);
+    edge->setInformation(info_matrix);
+    edge->setParameterId(0, 0);
+    optimizer->addEdge(edge);
+}
+```
+
+코드를 보면 edge를 어떻게 생성하고 optimizer에 추가하는지 알 수 있다. 설명이 필요한 부분만 설명해보겠다.
+- `edge->setVertex(0, ~~~);`: edge 생성 과정에서 vertex를 입력할 때 첫 번째 인자로 0과 1을 넣는데 edge의 방향을 나타내는 것이다. 0은 edge의 시작점, 1은 끝점의 vertex를 지정한다.  
+- `optimizer->vertices().find(poseid)->second`: optimizer 내부에 `std::map`으로 vertex를 저장하고 있으며 key 값으로 vertex ID를 쓴다. `std::map`에서는 key를 `first`에 저장하고 value를 `second`로 저장한다.  
+- `edge->setMeasurement(relpt);`: 두 vertex 사이의 관계, 즉 measurement를 입력한다.
+- `edge->setParameterId(0, 0);`: 이걸 안해서 에러나고 원인 찾느라 애를 먹었는데 [Issue](https://github.com/RainerKuemmerle/g2o/issues/34)에서 답을 찾을 수 있었다.   
+
+`VertexSE3`을 쓰기 위해서는 `SE3Quat`을 위한 offset을 파라미터로 미리 지정을 해야한다. 다음은 파라미터를 입력하는 코드다.
+
+```cpp
+g2o::ParameterSE3Offset* cameraOffset = new g2o::ParameterSE3Offset;
+cameraOffset->setId(0);
+optimizer->addParameter(cameraOffset);
+```
+
+위 코드에서 파라미터 ID를 0으로 지정했기 때문에 edge에서도 `edge->setParameterId(0, 0);`와 같이 0번 파라미터를 지정한다. offset parameter 타입으로는 `ParameterSE3Offset`외에도 `ParameterCamera`가 있는데 이건 아직 사용해보진 않았지만 카메라 측정 데이터를 표현하는 `EdgeSE3PointXYZDepth`나 `EdgeSE3PointXYZDisparity`를 사용할 때 써야할 것 같다.
+
+TODO
+- [ ] : BA 타입 정리하기

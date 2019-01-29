@@ -1,15 +1,18 @@
 ---
 layout: post
-title:  "How to use g2o (nonlinear optimization library)"
+title:  "How to use g2o #1 (nonlinear optimization library)"
 date:   2019-01-20 09:00:01
-categories: jekyll
+categories: slam-2018-fall
 ---
 
 
-# How to use g2o (nonlinear optimization library)
+# How to use g2o #1 (nonlinear optimization library)
+
+## Abstract
 
 g2o GitHub: https://github.com/RainerKuemmerle/g2o  
 테스트 환경: Ubuntu 18.04 with QtCreator  
+이번 포스트에서는 g2o 라는 optimimization library를 소개하고 예제를 통해 사용방법을 설명한다. 특히 이번 포스트에서는 **optimizer의 다양한 옵션**에 대해 알아본다. 다음 포스트에서는 **graph의 다양한 vertex(node), edge 타입**에 대해 설명한다.
 
 ## 1. Introduction to g2o
 
@@ -421,3 +424,5 @@ EDGE_SE3:QUAT 7 8 1.41421 0.585786 0 0 0 0.382683 0.92388 10 0 0 0 0 0 10 0 0 0 
 EDGE_SE3:QUAT 8 9 1.41421 0.585786 0 0 0 0.382683 0.92388 10 0 0 0 0 0 10 0 0 0 0 10 0 0 0 10 0 0 10 0 10 
 EDGE_SE3:QUAT 1 9 2.22045e-16 -2.22045e-16 0 0 0 1.66533e-16 1 10 0 0 0 0 0 10 0 0 0 0 10 0 0 0 10 0 0 10 0 10 
 ```
+
+이번 포스트에서는 optmizer의 다양한 옵션에 대해서 알아보고 예제에서는 단순히 SE3 pose로만 구성된 그래프를 최적화 해보았다. 다음 포스트에서는 g2o의 다양한 vertex, edge 타입에 대해서 알아보겠다.
