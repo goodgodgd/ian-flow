@@ -158,7 +158,7 @@ void Slam3DConstructor::addEdgePosePoint(int poseid, int ptid, const Eigen::Vect
 - `edge->setMeasurement(relpt);`: 두 vertex 사이의 관계, 즉 measurement를 입력한다.
 - `edge->setParameterId(0, 0);`: 이걸 안해서 에러나고 원인 찾느라 애를 먹었는데 [Issue](https://github.com/RainerKuemmerle/g2o/issues/34)에서 답을 찾을 수 있었다.   
 
-`VertexSE3`을 쓰기 위해서는 `SE3Quat`을 위한 offset을 파라미터로 미리 지정을 해야한다. 다음은 파라미터를 입력하는 코드다.
+`EdgeSE3PointXYZ`을 쓰기 위해서는 `SE3Quat`을 위한 offset을 파라미터로 미리 지정을 해야한다. 이것도 문서가 없으므로 용도를 추측해 보자면 예를들어 로봇에 센서가 장착된 시스템인 경우 SLAM에서 최적화 하는 pose는 로봇의 pose인데 measurement는 카메라 좌표계로 들어오는 경우 로봇과 카메라 사이의 상대 pose를 offset으로 입력할 수 있게 한듯 하다. 다음은 파라미터를 입력하는 코드다.
 
 ```cpp
 g2o::ParameterSE3Offset* cameraOffset = new g2o::ParameterSE3Offset;
