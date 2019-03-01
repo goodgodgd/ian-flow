@@ -42,7 +42,7 @@ github 등에서 사용하는 마크다운을 정적 사이트로 변환해 주�
 
 ### GitHub 저장소 만들기 
 
-[GitHub](https://github.com/)에 들어가서 계정에 로그인 하고 아래 그림처럼 나오면 `New Repository`를 누르고 이름만 정해주면 된다. 프로젝트 명을 `blog` 라고 지으면 블로그 url이 `https://[username]/github.io` 로 나오고 다르게 지으면 `https://[username]/github.io/[project name]` 으로 나온다. 나같은 경우는 `https://goodgodgd.github.io/ian-flow/`가 되었다.
+[GitHub](https://github.com/)에 들어가서 계정에 로그인 하고 아래 그림처럼 나오면 `New Repository`를 누르고 이름만 정해주면 된다. 프로젝트 명을 `blog` 라고 지으면 블로그 url이 `https://[username]/github.io` 로 나오고 다르게 지으면 `https://[username]/github.io/[repo name]` 으로 나온다. 나같은 경우는 `https://goodgodgd.github.io/ian-flow/`가 되었다.
 ![github new project](/ian-flow/assets/2019-01-06-first-step-to-jekyll/github-new-project.png)
 
 ### 제일 어려운 건? 테마 선택!
@@ -80,7 +80,7 @@ typora는 마크다운을 워드처럼 [WISYWIG](https://ko.wikipedia.org/wiki/%
 - package → gem: 패키지는 패키지인ㄷ... C++의 라이브러리 정도로 보면 되겠다.
 - pipenv → bundler: ruby 및 gem 버전 관리자
 
-윈도우에서 루비를 설치했다면 `시작`에 `Start command prompt with Ruby`가 있을 것이다. 그걸 열고 디렉토리를 `cd /path/to/theme`으로 이동하자. 먼저 번들러를 설치하고 번들러를 이용해 테마에 필요한 gem들을 설치할 것이다. 테마에 필요한 gem들은 테마 안에 있는 `Gemfile` 정의 되어 있다. 아래 명령어를 실행해보자. 혹시 `Gemfile.lock`이 있다면 지우고 실행한다.
+윈도우에서 루비를 설치했다면 `시작`에 `Start command prompt with Ruby`가 있을 것이다. 그걸 열고 디렉토리를 `cd /path/to/theme`으로 이동하자. 먼저 번들러를 설치하고 번들러를 이용해 테마에 필요한 gem들을 설치할 것이다. 테마에 필요한 gem들은 테마 안에 있는 `Gemfile` 정의 되어 있다. 아래 명령어를 실행해보자. 혹시 `Gemfile.lock`이 있다면 지우고 실행한다.
 
 ```
 # 번들러 설치
@@ -140,5 +140,20 @@ git add .
 git commit -m 'your commit message'
 git push origin gh-pages
 ```
-GitHub에 소스가 업데이트 되었다면 이제 블로그를 확인해보자. [GitHub 저장소 만들기](#create-repository)에서 말한 것 처럼 `https://[username]/github.io`  혹은 `https://[username]/github.io/[project name]` 주소로 들어가면 생성된 블로그를 볼 수 있다. 한번에 쭉 성공했... 을리는 없지만 암튼 성공했다면 축하하고 실패했다면 구글신에게 물어보자. 화이팅!!
+GitHub에 소스가 업데이트 되었다면 이제 블로그를 확인해보자. [GitHub 저장소 만들기](#create-repository)에서 말한 것 처럼 `https://[username]/github.io`  혹은 `https://[username]/github.io/[repo name]` 주소로 들어가면 생성된 블로그를 볼 수 있다. 한번에 쭉 성공했... 을리는 없지만 암튼 성공했다면 축하하고 실패했다면 구글신에게 물어보자. 화이팅!!
 
+
+### 2019.3.2 업데이트: github page를 여러개 만들고 싶다면?
+
+용도가 다른 여러개의 블로그를 동시에 운영하고 싶다면 그냥 새로운 github repo를 만들고 테마 복사해서 넣고 push 하면 된다. 문제는 이렇게 했을 때 공포의 `404` 페이지가 뜬다는 것. (Site not found)  
+나 역시 기존에 있던 블로그 소스를 몽땅 복사한 다음 `_config.yml`에서 저장소 이름만 바꿔서 올렸는데 `404` 페이지를 만나게 되었다. 왜 안 될까 고민하면서 뒤적거리다가 `_config.yml` 안의 아래 줄이 맘에 걸렸다.  
+
+```
+url: "https://[username].github.io/"
+baseurl: "/[repo name]"
+```
+
+기존 블로그의 `_config.yml` 파일에도 url이 같이 때문에 혹시혹시 url이 겹쳐서 사이트가 생성되지 않은 걸까? 그래서 url 자체에 baseurl까지 붙여서 전체 주소를 써넣었다.  
+`url: "https://[username].github.io/[repo name]"`  
+
+그랬더니 이제 페이지가 보인다!! 오늘도 수고했다며 셀프 칭찬을 하고... ~~자야겠다.~~
