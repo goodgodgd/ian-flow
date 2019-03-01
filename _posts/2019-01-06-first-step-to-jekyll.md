@@ -74,14 +74,22 @@ categories: mycategory
 
 typora는 마크다운을 워드처럼 [WISYWIG](https://ko.wikipedia.org/wiki/%EC%9C%84%EC%A7%80%EC%9C%84%EA%B7%B8) 로 편집할 수 있게 해준다. 물론 `ctrl+/`을 누르면 코드 모드로 전환도 가능하다. 심지어 tex 수식도 렌더링해서 보여준다. 내부에서 테마도 바꿀수 있고 여러 기능들이 있으니 잘 찾아쓰길 바란다.
 
-포스트를 작성했으면 지킬로 웹페이지를 만들어보자. 윈도우에서 루비를 설치했다면 `시작`에 `Start command prompt with Ruby`가 있을 것이다. 그걸 열고 디렉토리를 `cd /path/to/theme`으로 이동해보자. 먼저 필요한 `gem`들을 설치한다. 이를 위해서 반드시 `Gemfile` 파일이 있는 디렉토리 위치에서 명령을 실행한다. 혹시 `Gemfile.lock`이 있다면 지우고 실행한다.
+지킬을 로컬에서 돌리기 위해 먼저 루비 환경을 만들어야 한다. Python이 익숙한 사람을 위해 비슷한 용어를 연결해보면
+
+- python → ruby: 프로그래밍 언어
+- package → gem: 패키지는 패키지인ㄷ... C++의 라이브러리 정도로 보면 되겠다.
+- pipenv → bundler: ruby 및 gem 버전 관리자
+
+윈도우에서 루비를 설치했다면 `시작`에 `Start command prompt with Ruby`가 있을 것이다. 그걸 열고 디렉토리를 `cd /path/to/theme`으로 이동하자. 먼저 번들러를 설치하고 번들러를 이용해 테마에 필요한 gem들을 설치할 것이다. 테마에 필요한 gem들은 테마 안에 있는 `Gemfile` 정의 되어 있다. 아래 명령어를 실행해보자. 혹시 `Gemfile.lock`이 있다면 지우고 실행한다.
 
 ```
+# 번들러 설치
 $ gem install jekyll bundler
+# 필요한 gem 설치, 반드시 `Gemfile` 파일이 있는 디렉토리 위치에서 명령을 실행
 $ bundle
 ```
 
-이후 아래와 같은 명령을 치고 서버가 돌아가는지 확인하자.
+포스트를 작성했으면 지킬로 웹페이지를 만들어보자. jekyll을 이용해서 마크다운으로부터 html을 생산하는 과정이다. 만들어진 html들은 `_site` 폴더 아래 생성된다. 아래와 같은 명령을 치고 서버가 돌아가는지 확인하자.
 
 ```
 $ bundle exec jekyll serve
