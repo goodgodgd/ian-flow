@@ -4,15 +4,15 @@ url: "https://goodgodgd.github.io"    # the protocol and hostname of your site, 
 baseurl: "/ian-flow" # the prefix of your site uri, eg. `"/jekyll-theme-EasyBook"` or empty string `""`
 #timezone: Asia/Seoul
 description: >
-  flow of ian's mind
+  what flows in ian's mind
 
 # Your information
-email: goodgodgd@yonsei.ac.kr
-author: Hyukdoo Choi
+email: goodgodgd85@gmail.com
+author: Ian Choi
 profile: an enthuasitic researcher
 github_username: goodgodgd
 profile_links:
-  Email: "mailto:goodgodgd@yonsei.ac.kr"
+  Email: "mailto:goodgodgd85@gmail.com
   # You can add more profile links above, or edit _includes/sidebar.html 
 
 excerpt_separator: <!--more-->
