@@ -4,6 +4,13 @@ title: About
 permalink: /about/
 ---
 
-Welcome to this website!
+Welcome to Ian's Blog!  
 
-> This website is using [laobubu](http://laobubu.net)'s theme: [EasyBook](https://github.com/laobubu/jekyll-theme-EasyBook)
+Ian is me, an assistant professor in a university.  
+
+This blog deals with anything that flows in my mind, mainly technical issues, and is written mainly in Korean.
+
+My interests include robotics, SLAM (simultaneous localization and mapping), VO (visual odometry),  Computer Vision, Machine Learning, and Deep Learning.    
+
+If you want to contact me, send an email to "goodgodgd85 at google.com".
+
