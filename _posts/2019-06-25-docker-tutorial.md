@@ -8,16 +8,20 @@ categories: tools
 
 ## Motivation
 
-연구 때문에 [ORB-SLAM](https://github.com/raulmur/ORB_SLAM) 이라는 걸 돌려봐야 했는데 오래된 코드라 테스트 환경이 무려 Ubuntu 12.04 or 14.04로 되어있을 뿐만 아니라 구버전 우분투에서만 작동하는 ROS Hydro or Indigo까지 dependency로 잡혀있어서 **Ubuntu 14.04를 설치해야 하는 상황**이 되었다. 이거 하자고 옛날 우분투를 시스템에 새로 깐다거나 VirtualBox로 깔긴 싫고 이럴 때 쓰라고 만든 **Docker**를 처음 써보기로 했다.
+연구 때문에 [ORB-SLAM](https://github.com/raulmur/ORB_SLAM) 이라는 걸 돌려봐야 했는데 오래된 코드라 테스트 환경이 무려 Ubuntu 12.04 or 14.04로 되어있을 뿐만 아니라 구버전 우분투에서만 작동하는 ROS Hydro or Indigo까지 dependency로 잡혀있어서 **Ubuntu 14.04를 설치해야 하는 상황**이 되었다. 이거 하자고 옛날 우분투를 시스템에 새로 깐다거나 VirtualBox로 깔긴 싫고 이럴 때 쓰라고 만든 **Docker**를 처음 써보기로 했다. 그런데 쓰다보니 GUI도 돌려야해서 본 포스트는 크게 "도커 사용법"과 도커에서 "GUI 사용법" 크게 두 가지 내용을 다룬다.
 
 
 
 ## Docker 란?
 
-무식한 내가 떠드는 것 보다는 이미 훌륭한 분들이 잘 정리한 블로그를 보는게 나을듯 하다.
-- [초보를 위한 도커 안내서 - 도커란 무엇인가?](https://subicura.com/2017/01/19/docker-guide-for-beginners-1.html)
+무식한 내가 떠드는 것 보다는 이미 훌륭한 분들이 잘 정리한 블로그를 보는게 나을듯 하다. 특히 "초보를 위한 도커 안내서"는 기본 개념부터 사용법까지 상세하게 잘 정리되어 있으니 초보자라면 처음부터 다 읽어보면 좋다.~~(저걸 다 읽으면 GUI 빼곤 이 포스트를 읽을 필요가 없습니다;;)~~
 - [도커란 무엇인가?(WHAT IS DOCKER?)](http://avilos.codes/infra-management/virtualization-platform/docker/what-is-docker/)
 - [도커란 무엇인가? / Docker 컨테이너 / Docker 이미지 / LXC / 가상화](http://dev.youngkyu.kr/32)
+- [초보를 위한 도커 안내서 - 도커란 무엇인가?](<https://subicura.com/2017/01/19/docker-guide-for-beginners-1.html>)
+- [초보를 위한 도커 안내서 - 설치하고 컨테이너 실행하기](<https://subicura.com/2017/01/19/docker-guide-for-beginners-2.html>)
+- [초보를 위한 도커 안내서 - 이미지 만들고 배포하기](<https://subicura.com/2017/02/10/docker-guide-for-beginners-create-image-and-deploy.html>)
+
+
 
 한 줄 요약: 고정량의 하드디스크와 메모리를 할당하지 않고 컨테이너 안의 격리된 프로세스로 돌아가는 가상 머신   
 
@@ -130,8 +134,8 @@ RUN chmod a+x setup.sh \
 - FROM: 상속 받을 base image 지정
 - ENV: 환경변수 설정
 - WORKDIR: 작업공간 설정, 컨테이너에 들어갔을 때 시작 위치
-- COPY <host path> <image path>: 호스트의 파일 또는 폴더를 이미지로 복사
-- RUN <command>: 명령어 실행
+- COPY \<host path\> \<image path\>: 호스트의 파일 또는 폴더를 이미지로 복사
+- RUN \<command\>: 명령어 (command) 실행
 
 Dockerfile을 작성하는 자세한 방법은 아래 링크들을 확인하길 바란다.
 
@@ -160,7 +164,7 @@ docker run --name <container name> -it <image name>:<tag>  bash
 `docker run` 옵션에 대해 알아보자. 자세한 내용은 [이곳](http://blog.naver.com/PostView.nhn?blogId=alice_k106&logNo=220340499760)에도 설명이 잘 되어있다.
 - `-i`: interactive의 약자로 docker에서 실행한 결과를 호스트로 출력해 준다.
 - `-t`: tty의 약자로 터미널을 쓰게 해준다. `-i`와 합쳐서 `-it` 혹은 `-ti`로 써도 된다.
-- `-v`: volume의 약자로 `-v <host path>:<container path>` 옵션을 주면 호스트의 디렉토리를 컨테이너와 공유할 수 있다.
+- `-v` 혹은 `--volume`:  `-v <host path>:<container path>:<authority>` 옵션을 주면 호스트의 디렉토리를 컨테이너와 공유할 수 있다. 세 번째 authority 항목은 옵션인데 `ro`를 입력하면 read-only 가 되어 컨테이너에서 디렉토리 내용을 읽기만 가능하고 `rw`는 read-and-write 로서 읽고 쓰기가 가능하다. 지정하지 않으면 `rw`가 기본값이다. <https://docs.docker.com/storage/volumes/#use-a-read-only-volume>
 - `--name`: 컨테이너의 이름을 지정한다. 이 옵션을 주지 않으면 도커가 임의로 이름을 짓기 때문에 나중에 컨테이너를 다시 실행할 때 이름을 찾는 번거로움이 있으므로 이름을 지정해주는 것이 좋다. 
 
 옵션들을 조합하여 나는 아래와 같이 컨테이너를 실행하였다. `roscore`가 작동하는지 확인해보고 컨테이너를 종료하고 빠져나올 때는 `exit`를 치면 된다.
@@ -168,7 +172,6 @@ docker run --name <container name> -it <image name>:<tag>  bash
 $ docker run --name orbslam -it -v /home/ian/workplace/docker/trusty-ros-full/share:/work/share trusty-ros-full:0.2 bash
 root@95793a452c6d:/work# roscore
 root@95793a452c6d:/work# exit
-$
 ```
 
 
@@ -191,7 +194,7 @@ $ docker rmi <image name>:<tag>
 $ docker rmi $(docker images | grep "^<none>" | awk "{print $3}")
 ```
 
-도커 이미지를 빌드하다가 실패하면 이름이 <none>으로 되어있는 ~~찌꺼기~~ 이미지가 남는데 이때 tag되지 않은 이미지 삭제 명령어가 유용하다.
+도커 이미지를 빌드하다가 실패하면 이름이 \<none\>으로 되어있는 ~~찌꺼기~~ 이미지가 남는데 이때 tag되지 않은 이미지 삭제 명령어가 유용하다.
 
 #### 컨테이너 관리
 
@@ -211,7 +214,7 @@ $ docker container prune -f
 ```
 
 
-### 주의사항
+### 유의사항
 
 ROS Indigo 서버가 뭔가 작업중인지 자꾸 `apt update`를 할 때마다 `Hash sum mismatch`라는 에러가 난다. 오래된 버전이라 관리를 제대로 안해주는건지... 구글에 "Hash sum mismatch"라고 치면 주로 `rm -rf /var/lib/apt/lists/*` 라든가 `apt-get clean` 명령어를 쳐보라고 하는데 효과가 없었다. 시스템 내부 문제면 저걸로 해결이 되겠지만 서버자체에 문제가 있으면 해결이 되기를 기다리는 수밖에 없다. 며칠 지나면 문제 없다가 다시 생기기도 하고... 암튼 저걸로 시간을 많이 버렸는데 저 에러가 나면 너무 애쓰지 말고 기다려보길 바란다.
 
@@ -219,22 +222,118 @@ ROS Indigo 서버가 뭔가 작업중인지 자꾸 `apt update`를 할 때마다
 
 ## GUI 사용법
 
-도커가 차암~ 좋긴 좋은데 한가지 아쉬운점은 GUI를 쓸수 없다는 점이다. 기본에 충실한 개발자님들은 그런거 필요없다고 하시겠지만 나같은 날라리 사용자는 `ls` 보다는 노틸러스로 보는게 편하다. 게다가 내가 도커에서 돌리고 싶은 프로그램이 GUI 요소를 포함할 때가 많다. 그래서 다방면으로 구글링한 결과 다음과 같은 결과를 얻었다.
+도커가 차암~ 좋긴 좋은데 한가지 아쉬운점은 GUI를 쓸수 없다는 점이다. 기본에 충실한 개발자님들은 그런거 필요없다고 하시겠지만 나같은 날라리 사용자는 `ls` 보다는 노틸러스로 보는게 편하다. 게다가 내가 도커에서 돌리고 싶은 프로그램이 GUI 요소를 포함할 때가 많다. 그래서 다방면으로 구글링한 결과 ROS에서 제공하는 가이드가 가장 정확하고 다양한 방법을 알려준다.
+
+<<http://wiki.ros.org/docker/Tutorials/GUI>>
 
 
 
+### A. xhost를 이용한 X server 연결
+
+다음은 ubuntu:18.04 이미지로부터 GUI가 가능한 `test-gui`라는 컨테이너를 실행하는 커맨드다. 두 커맨드의 순서는 상관없다. `docker run`을 실행하면 컨테이너 내부로 들어가므로 `xhost`를 미리 실행하던가 아니면 `docker run` 이후에 다른 터미널을 열어 `xhost`를 실행해도 된다.
+
+```bash
+$ xhost +local:
+$ docker run -it \
+	--name test-gui \
+	--env="DISPLAY" \
+	--volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+	ubuntu:18.04 bash
+```
+
+해석을 해보자. 리눅스의 GUI는 리눅스 커널 자체에서 처리하지 않고 X server를 띄워놓고 이를 통해 화면에 무언가를 표시한다. 그말인즉슨 네트워크에 연결만 되어있으면 다른 컴퓨터의 프로그램도 내 컴퓨터의 X server에 연결만 하면 내 컴퓨터 화면에 띄울수 있다는 소리가된다. ~~사실 자세한 내용은 나도 잘 모른다.~~   
+
+첫 번째 커맨드인 `xhost +local:`는 X server에 대한 로컬 유저의 접근을 허가한다. `xhost`라는 명령어가 무엇인지 찾아봤는데 매뉴얼의 설명은 이렇다.
+
+> The xhost program is used to add and delete host names or user names to the list allowed to make connections to the X server.
+>
+> xhost는 X server에 접근가능한 호스트 이름이나 유저 이름을 추가하거나 지우는 명령어다.
+
+xhost의 활용법은 이 블로그에 잘 나와있다. <http://egloos.zum.com/potato1004/v/9290287>  
+
+블로그마다 `+local:` 뒤에 root를 붙이라는데도 있고 docker를 붙이라는데도 있는데 원리는 모르지만 내가 실험해보니 위 명령어처럼 안써도 되고 아무거나 써도 상관없이 GUI는 작동한다. `xhost +family:name` 형식으로 지정하는 것인데 family만 local로 지정하면 된다.
+
+두 번째 `docker run~~` 커맨드는 호스트의 `DISPLAY` 환경변수를 컨테이너로 전달하고 호스트의 X11 unix socket을 컨테이너에 마운트한다. ~~무슨 말인지 나도 절반만 이해했다.~~
+
+GUI가 되는지 확인하기 위해 컨테이너에서 파일 탐색기인 nautilus를 설치하고 실행해보자.
+
+```
+root@1c8c4b907073:/# apt update
+root@1c8c4b907073:/# apt install -y nautilus
+root@1c8c4b907073:/# nautilus
+```
+
+GUI 테마가 좀 다르긴 하지만 실행되는 것을 볼 수 있을 것이다. 실행하면 /root/.config/nautilus 디렉토리를 만들어달라는 메시지 팝업이 뜨는데 `mkdir -p /root/.config/nautilus`로 디렉토리를 만들어주면 더이상 뜨지 않는다.  
+
+다른 방법도 있는 것 같은데 좀 더 복잡하고 내가 했을때 안되는 것도 있어서 나는 이렇게 쓰고 있다.
 
 
 
+### B. OpenGL 어플리케이션 활용
 
-https://subicura.com/2017/01/19/docker-guide-for-beginners-1.html
+그런데 A의 방법으로 모든 GUI 어플리케이션을 사용할 수 있는 것은 아니다. OpenGL 등의 GPU 하드웨어를 이용하는 어플리케이션은 실행이 안된다. 기본적으로 docker에서 GPU 접근이 안되기 때문이다. GL을 활용한 프고램을 실행해보면 실행되지 않는다.
 
-https://subicura.com/2017/01/19/docker-guide-for-beginners-2.html
+```
+root@1c8c4b907073:/# apt install mesa-utils
+root@1c8c4b907073:/# glxgears
+libGL error: No matching fbConfigs or visuals found
+libGL error: failed to load driver: swrast
+X Error of failed request:  BadValue (integer parameter out of range for operation)
+  Major opcode of failed request:  155 (GLX)
+  Minor opcode of failed request:  3 (X_GLXCreateContext)
+  Value in failed request:  0x0
+  Serial number of failed request:  45
+  Current serial number in output stream:  47
+```
 
-https://subicura.com/2017/02/10/docker-guide-for-beginners-create-image-and-deploy.html
 
-http://egloos.zum.com/potato1004/v/9290287
 
-http://wiki.ros.org/docker/Tutorials/GUI
+컨테이너에서 GPU에 접근하기 위해서는 이를 위한 전용 도커 설치가 필요하다. 아직까지 내가 알기로는 NVidia GPU만 이를 지원하고 NVidia GPU가 설치된 PC에서는 `nvidia-docker2`를 설치하면 된다. 설치과정은 다음 링크를 참조한다.
 
-https://docs.docker.com/storage/volumes/#use-a-read-only-volume
+<https://github.com/NVIDIA/nvidia-docker/wiki/Installation-(version-2.0)>
+
+설치 전에 NVidia 드라이버 버전을 확인한다. (~=361.93) `nvidia-docker`는 기본 `docker`에 GPU 활용기능만 추가한 thin wrapper라고 보면 된다. 사용방법도 기본 도커와 동일하다. 
+
+```
+$ sudo apt-get install nvidia-docker2
+$ sudo pkill -SIGHUP dockerd
+```
+
+
+
+`nvidia-docker` 설치로 끝나는 것은 아니고 도커에서 opengl을 쓸수 있게 설정해놓은 도커 이미지가 있어야 한다. 일반 이미지에서도 `Dockerfile` 을 잘 만들면 가능한 것 같지만 ([링크](https://github.com/NVIDIA/nvidia-docker/issues/136)) 그냥 우분투 이미지를 쓸거라면 NVidia에서 제공한 `nvidia/opengl` 이미지를 사용하는 것이 편하다. OpenGL외에 CUDA까지 쓸거라면 `nvidia/cuda` 이미지를 써야한다. 이미지 태그는 여기서 확인할 수 있다.
+
+<https://hub.docker.com/r/nvidia/opengl>
+
+<https://hub.docker.com/r/nvidia/cuda>
+
+Ubuntu 18.04를 기반으로 OpenGL이 가능한 이미지는 `nvidia/opengl:1.0-glvnd-devel-ubuntu18.04` 이다. 다음 명령어로 내려 받을 수 있다.
+
+```
+$ docker pull nvidia/opengl:1.0-glvnd-devel-ubuntu18.04
+```
+
+이제 컨테이너를 만들어 실행해보자. `docker` 대신 `nvidia-docker`를 쓰고 이미지도 `nvidia/opengl` 이미지를 사용한다. 이때도 GUI를 쓰기 위해서는 `xhost` 명령어를 미리 써야 하는데 로그인 후 한 번만 실행하면 된다.
+
+```bash
+$ nvidia-docker run -it \
+	--name test-gl-gui \
+	--env="DISPLAY" \
+	--volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+	nvidia/opengl:1.0-glvnd-devel-ubuntu18.04 bash
+```
+
+컨테이너에서 nautilus와 mesa-utils를 설치하고 실행해보자.
+
+```
+root@572be97f593a:/# apt update
+root@572be97f593a:/# apt install -y nautilus mesa-utils
+root@572be97f593a:/# nautilus
+root@572be97f593a:/# glxgears
+```
+
+당연히 nautilus는 실행될 것이고 지금까지 잘 따라왔다면 glxgears를 실행했을 때 빨녹파의 화사한 톱니바퀴가 돌아가는 것이 보일것이다.
+
+
+
+지금까지 내가 공부한 도커의 사용법을 정리해보았다. 도커를 익숙하게 쓰기까지 (자세히는 아직 잘 모르지만) 2주 정도의 고통스런 시간이 필요했다. 도커에서 소스를 빌드했는데 GUI가 안떠서 에러가 나고 GUI 쓰는 법을 겨우 알아냈더니 OpenGL에서 에러가 나고... 어쨌든 이런저런 문제들을 해결하고 나니 호스트 시스템을 더럽히지 않으면서 깔고 싶은 것을 마음껏 깔아보고 맘에 안들면 지워버릴 수 있게 되어 잘 쓰고 있다.
