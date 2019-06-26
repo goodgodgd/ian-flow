@@ -238,7 +238,7 @@ $$
 
 ![rigid body motion](/ian-flow/assets/2019-01-03-rigid-body-motion/rigid-body-motion.png)
 
-The figure illustrates a moving rigid object with a coordinate frame $ C $. The coordinates of the point $ p $ is either $ X_w $ in the world frame or $ X_c ​$ in the object frame. The relationship between them is given by  
+The figure illustrates a moving rigid object with a coordinate frame $ C $. The coordinates of the point $ p $ is either $ X_w $ in the world frame or $ X_c $ in the object frame. The relationship between them is given by  
 
 $$
 X_w = R_{wc}X_c + T_{wc}
