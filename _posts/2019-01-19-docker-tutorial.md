@@ -1,19 +1,17 @@
 ---
 layout: post
-title:  "Docker에서 ORB-SLAM 실행하기"
+title:  "Practice Docker building ORB-SLAM"
 date:   2019-01-19 09:00:01
-categories: myflow
+categories: tools
 
 ---
-
-# Docker에서 ORB-SLAM 실행하기
 
 ## Motivation
 
 연구 때문에 [ORB-SLAM](https://github.com/raulmur/ORB_SLAM) 이라는 걸 돌려봐야 했는데 오래된 코드라 테스트 환경이 무려 **Ubuntu 12.04 or 14.04**로 되어있을 뿐만 아니라 저 우분투에서만 작동하는 **ROS Hydro or Indigo**까지 dependency로 잡혀있어서 Ubuntu 14.04를 설치해야 하는 상황이 되었다. 이거 하자고 우분투를 VirtualBox로 깔긴 싫고 이럴 때 쓰라고 만든 **Docker**를 처음 써보기로 했다.
 
 ## Docker 란?
-나처럼 무식한 사람이 어줍잖게 떠드는 것 보다는 이미 훌륭한 분들이 잘 정리한 블로그를 보는게 나을듯 하다.
+나처럼 무식한 사람이 떠드는 것 보다는 이미 훌륭한 분들이 잘 정리한 블로그를 보는게 나을듯 하다.
 - [초보를 위한 도커 안내서 - 도커란 무엇인가?](https://subicura.com/2017/01/19/docker-guide-for-beginners-1.html)
 - [도커란 무엇인가?(WHAT IS DOCKER?)](http://avilos.codes/infra-management/virtualization-platform/docker/what-is-docker/)
 - [도커란 무엇인가? / Docker 컨테이너 / Docker 이미지 / LXC / 가상화](http://dev.youngkyu.kr/32)
@@ -77,7 +75,7 @@ sudo docker pull ubuntu:14.04
 
 Ubuntu 14.04에 ROS Indigo를 설치하고 그 다음에 ORB SLAM을 빌드할 것이다. 나는 ROS Indigo를 설치하는 것 까지는 도커 이미지로 만들고 ORB SLAM을 빌드하는 것은 컨테이너 내부에서 실행 할 것이다.  
 만약 ORB SLAM 소스를 빌드하는 과정까지 도커 이미지 빌드 과정에 넣어버리면 ORB SLAM을 빌드하는 과정에서 생긴 오류를 수정해서 새로운 이미지를 빌드 할 때마다 ROS Indigo 설치하는 것을 기다려야 하기 때문이다.  
-Base image를 바탕으로 내가 원하는 것이 설치된 새로운 이미지를 만들기 위해서는 `Dockerfile`을 작성해야 한다.  아래에 나오는 모든 파일들은 [GitHub](https://github.com/goodgodgd/orbslam-docker)에서 받을 수 있다.
+Base image를 바탕으로 내가 원하는 것이 설치된 새로운 이미지를 만들기 위해서는 `Dockerfile`을 작성해야 한다. 
 
 ### trusty-ros-full 이미지 만들기
 

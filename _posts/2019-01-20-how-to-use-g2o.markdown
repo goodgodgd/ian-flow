@@ -2,7 +2,7 @@
 layout: post
 title:  "How to use g2o #1 (nonlinear optimization library)"
 date:   2019-01-20 09:00:01
-categories: slam-2018-fall
+categories: slam
 ---
 
 
