@@ -129,7 +129,7 @@ RUN chmod a+x setup.sh \
 	&& ./setup.sh
 ```
 
-내가 필요한 설치 과정을 모두 `RUN` 명령어를 이용해 작성하자면 Dockerfile이 너무 지저분해질 거 같아서 따로 스크립트로 만들었다. 하지만 보통은 RUN 뒤에 명령어를 길게 쓰는 게 일반적이다. 여기서 쓰인 Dockerfile의 키워드들은 다음과 같다.
+내가 필요한 설치 과정을 모두 `RUN` 명령어를 이용해 작성하자면 Dockerfile이 너무 지저분해질 거 같아서 따로 스크립트로 만들었다. 하지만 보통은 RUN 뒤에 명령어를 길게 쓰는 게 일반적이다. 여기서 쓰인 Dockerfile의 instruction들은 다음과 같다.
 
 - FROM: 상속 받을 base image 지정
 - ENV: 환경변수 설정
@@ -140,7 +140,7 @@ RUN chmod a+x setup.sh \
 Dockerfile을 작성하는 자세한 방법은 아래 링크들을 확인하길 바란다.
 
 - 공식 홈페이지 (기본 명령어 설명 잘 됨): <https://docs.docker.com/develop/develop-images/dockerfile_best-practices/>
-- 각 키워드에 대한 한글 설명(추천): <https://rampart81.github.io/post/dockerfile_instructions/>
+- 각 instruction에 대한 한글 설명(추천): <https://rampart81.github.io/post/dockerfile_instructions/>
 - 간단하게 쓰는 방법: <https://www.codementor.io/aviaryan/writing-your-first-dockerfile-7e0rjhual>
 - 잘 쓰는 방법: <https://rock-it.pl/how-to-write-excellent-dockerfiles/>
 
@@ -214,17 +214,17 @@ $ docker container prune -f
 ```
 
 
-### 유의사항
+### 유의사항 (ROS)
 
-ROS Indigo 서버가 뭔가 작업중인지 자꾸 `apt update`를 할 때마다 `Hash sum mismatch`라는 에러가 난다. 오래된 버전이라 관리를 제대로 안해주는건지... 구글에 "Hash sum mismatch"라고 치면 주로 `rm -rf /var/lib/apt/lists/*` 라든가 `apt-get clean` 명령어를 쳐보라고 하는데 효과가 없었다. 시스템 내부 문제면 저걸로 해결이 되겠지만 서버자체에 문제가 있으면 해결이 되기를 기다리는 수밖에 없다. 며칠 지나면 문제 없다가 다시 생기기도 하고... 암튼 저걸로 시간을 많이 버렸는데 저 에러가 나면 너무 애쓰지 말고 기다려보길 바란다.
+컨테이너 안에서 ROS Indigo를 설치하는데 ROS 서버가 뭔가 작업중인지 자꾸 `apt update`를 할 때마다 `Hash sum mismatch`라는 에러가 난다. 오래된 버전이라 관리를 제대로 안해주는건지... 구글에 "Hash sum mismatch"라고 치면 주로 `rm -rf /var/lib/apt/lists/*` 라든가 `apt-get clean` 명령어를 쳐보라고 하는데 효과가 없었다. 시스템 내부 문제면 저걸로 해결이 되겠지만 서버자체에 문제가 있으면 해결이 되기를 기다리는 수밖에 없다. 며칠 지나면 문제 없다가 다시 생기기도 하고... 암튼 저걸로 시간을 많이 버렸는데 저 에러가 나면 너무 애쓰지 말고 기다려보길 바란다.
 
 
 
 ## GUI 사용법
 
-도커가 차암~ 좋긴 좋은데 한가지 아쉬운점은 GUI를 쓸수 없다는 점이다. 기본에 충실한 개발자님들은 그런거 필요없다고 하시겠지만 나같은 날라리 사용자는 `ls` 보다는 노틸러스로 보는게 편하다. 게다가 내가 도커에서 돌리고 싶은 프로그램이 GUI 요소를 포함할 때가 많다. 그래서 다방면으로 구글링한 결과 ROS에서 제공하는 가이드가 가장 정확하고 다양한 방법을 알려준다.
+도커가 차암~ 좋긴 좋은데 한가지 아쉬운점은 GUI를 쓸수 없다는 점이다. 기본에 충실한 개발자님들은 그런거 필요없다고 하시겠지만 나같은 날라리 사용자는 `ls` 보다는 노틸러스로 보는게 편하다. 게다가 내가 도커에서 돌리고 싶은 프로그램이 GUI 요소를 포함할 때가 많다. 그래서 다방면으로 구글링한 결과 ROS에서 제공하는 가이드가 다양한 방법을 알려준다.
 
-<<http://wiki.ros.org/docker/Tutorials/GUI>>
+<http://wiki.ros.org/docker/Tutorials/GUI>
 
 
 
@@ -241,7 +241,7 @@ $ docker run -it \
 	ubuntu:18.04 bash
 ```
 
-해석을 해보자. 리눅스의 GUI는 리눅스 커널 자체에서 처리하지 않고 X server를 띄워놓고 이를 통해 화면에 무언가를 표시한다. 그말인즉슨 네트워크에 연결만 되어있으면 다른 컴퓨터의 프로그램도 내 컴퓨터의 X server에 연결만 하면 내 컴퓨터 화면에 띄울수 있다는 소리가된다. ~~사실 자세한 내용은 나도 잘 모른다.~~   
+해석을 해보자. 리눅스의 GUI는 리눅스 커널 자체에서 처리하지 않고 X server를 띄워놓고 이를 통해 화면에 무언가를 표시한다. 그말인즉슨 네트워크에 연결된 다른 컴퓨터의 프로그램도 내 컴퓨터의 X server에 연결만 하면 내 컴퓨터 화면에 띄울수 있다는 소리가된다. ~~사실 자세한 원리는 나도 잘 모른다.~~   
 
 첫 번째 커맨드인 `xhost +local:`는 X server에 대한 로컬 유저의 접근을 허가한다. `xhost`라는 명령어가 무엇인지 찾아봤는데 매뉴얼의 설명은 이렇다.
 
@@ -251,7 +251,7 @@ $ docker run -it \
 
 xhost의 활용법은 이 블로그에 잘 나와있다. <http://egloos.zum.com/potato1004/v/9290287>  
 
-블로그마다 `+local:` 뒤에 root를 붙이라는데도 있고 docker를 붙이라는데도 있는데 원리는 모르지만 내가 실험해보니 위 명령어처럼 안써도 되고 아무거나 써도 상관없이 GUI는 작동한다. `xhost +family:name` 형식으로 지정하는 것인데 family만 local로 지정하면 된다.
+블로그마다 `+local:` 뒤에 root를 붙이라는데도 있고 docker를 붙이라는데도 있는데 원리는 모르지만 내가 실험해보니 `+local:`처럼 아무것도 안써도 되고 뒤에 아무거나 붙여도 상관없이 GUI는 작동한다. `xhost +family:name` 형식으로 지정하는 것인데 family만 local로 지정하면 된다.
 
 두 번째 `docker run~~` 커맨드는 호스트의 `DISPLAY` 환경변수를 컨테이너로 전달하고 호스트의 X11 unix socket을 컨테이너에 마운트한다. ~~무슨 말인지 나도 절반만 이해했다.~~
 
@@ -271,7 +271,7 @@ GUI 테마가 좀 다르긴 하지만 실행되는 것을 볼 수 있을 것이�
 
 ### B. OpenGL 어플리케이션 활용
 
-그런데 A의 방법으로 모든 GUI 어플리케이션을 사용할 수 있는 것은 아니다. OpenGL 등의 GPU 하드웨어를 이용하는 어플리케이션은 실행이 안된다. 기본적으로 docker에서 GPU 접근이 안되기 때문이다. GL을 활용한 프고램을 실행해보면 실행되지 않는다.
+그런데 A의 방법으로 모든 GUI 어플리케이션을 사용할 수 있는 것은 아니다. OpenGL 등의 GPU 하드웨어를 이용하는 어플리케이션은 실행이 안된다. 기본적으로 docker에서 GPU 접근이 안되기 때문이다. OpenGL을 활용한 어플리케이션을 실행해보면 실행되지 않는다.
 
 ```
 root@1c8c4b907073:/# apt install mesa-utils
