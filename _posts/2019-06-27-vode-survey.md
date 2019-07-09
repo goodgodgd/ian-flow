@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "Paper Survey: Deep Learning based Visual Odometry and Depth Prediction"
+title:  "[작성중] Paper Survey: Deep Learning based Visual Odometry and Depth Prediction"
 date:   2019-06-27 09:00:01
-categories: slam
+categories: WIP
 
 ---
 
@@ -296,7 +296,7 @@ CVPR 2018부터 SfmLearner와 비슷한 목적을 가진 논문들이 여러 편
 | ---- | ---------------- | ---------- | -------------- | ------------- |
 | O    | O               | Unsupervised | O          | O          |
 
-**github**: <https://github.com/yzcjtr/GeoNet> (tensorflow)
+**github**: <https://github.com/yzcjtr/GeoNet> (tensorflow 1.1)
 
 
 
@@ -342,7 +342,7 @@ GeoNet은 아래 그림처럼 두 단계로 구성된다. 첫 번째 단계에�
 
 4. Flow smoothness loss: depth smoothness loss처럼 flow flow에 대한 smoothness 계산
 
-5. Geometric consistency loss: forward flow와 backward flow 사이에 역관계성을 측정한다. 역관계는 occluded region(한 쪽 영상에서만 보이는 부분)에서는 성립할 수 없으므로 그 부분을 제외하기 위해 $$[\delta(p_t)]$$를 곱한다. $$[\delta(p_t)]$$는 forward-backwad 오차가 작은 곳에서는 1이고 큰 곳에서는 0이 되는 함수다. (Left-right consistency loss와 유사)
+5. Geometric consistency loss: Left-right consistency loss 처럼 forward flow와 backward flow 사이에 역관계성을 측정한다. 역관계는 occluded region(한 쪽 영상에서만 보이는 부분)에서는 성립할 수 없으므로 그 부분을 제외하기 위해 $$[\delta(p_t)]$$를 곱한다. $$[\delta(p_t)]$$는 forward-backwad 오차가 작은 곳에서는 1이고 큰 곳에서는 0이 되는 함수다.
 
    ![geonet6](../assets/2019-06-27-vode-survey/geonet6.png)
 
@@ -350,19 +350,83 @@ GeoNet은 아래 그림처럼 두 단계로 구성된다. 첫 번째 단계에�
 
 
 
+# 7. LKVOLearner
 
 
 
+| 제목 | Learning Depth from Monocular Videos using Direct Methods    |
+| :--- | :----------------------------------------------------------- |
+| 저자 | Chaoyang Wang, Jose Miguel Buenaposada, Rui Zhu, Simon Lucey |
+| 출판 | CVPR, June 2018                                              |
+
+| Mono VO | Depth Prediction | Learning     | Absolute Scale | Open source |
+| ------- | ---------------- | ------------ | -------------- | ----------- |
+| O       | O                | Unsupervised | X              | O           |
+
+**github**: <https://github.com/MightyChaos/LKVOLearner> (PyTorch 0.3.1)
 
 
 
+## 특징
+
+기본적인 SfmLearner의 골격에 Geometric한 방법과 결합한 논문이다. Depth CNN과 Pose CNN을 학습시키는 것은 똑같다. 아래 그림에서 $$I_2$$를 reference 이미지로 하고 나머지를 source 이미지로 써서 photometric error를 줄이는 방향으로  학습하는 것도 같다. 아래 그림에 이 논문의 특징이 드러나 있다.
+
+- 아래 그림에서 (1)은 다른 논문처럼 CNN에서 직접 regression을 하는 방법이다.
+- (2)는 Pose CNN 대신 DVO (Direct Visual Odometry)를 쓴 방법이다. 기반 논문은 "Realtime visual odometry from dense rgb-d images (2011, ICCV)" 이다. LSD-SLAM이나 DSO처럼 픽셀 오차를 최소화하는 방법이다.
+- (3)은 DVO를 쓰는데 initial guess를 identity가 아닌 Pose CNN의 결과를 쓰는 방법이다. 이 논문의 핵심 contribution이라 할 수 있다.
 
 
 
+![LKVOLearner](D:\Work\ian-flow\assets\2019-06-27-vode-survey\LKVOLearner1.png)
 
 
 
+## Training and Loss
+
+초기에는 그림의 (1)처럼 일반적인 방법으로 Pose CNN과 Depth CNN을 동시에 학습시킨다. 이후에 Pose CNN은 DVO의 initial guess로만 쓰이고 DVO의 결과를 받아서 Depth CNN만 더 fine-tuing을 한다.  
+
+여기서 특징적인 것은 기존에 back propagation 할 때 depth 보정 신호로만 Depth CNN을 학습하던 것과는 달리 pose 보정신호로부터도 Depth CNN을 학습시킨다는 것이다. 그림의 (2)처럼 pose를 외부에서 받아서 depth만 학습시킨다고 했을 때 수식은 다음과 같다.
+
+![LKVOLearner2](D:\Work\ian-flow\assets\2019-06-27-vode-survey\LKVOLearner2.png)
+
+![LKVOLearner3](D:\Work\ian-flow\assets\2019-06-27-vode-survey\LKVOLearner3.png)
+
+- $$f_d()$$: depth predictor
+- $$f_p()$$: pose predictor based on DVO
+- $$L_{ap}()$$: appearance dissimilarity loss ($$L_{ap}()$$)
+- $$L_{prior}()$$: depth smoothness loss
 
 
 
+여기서 pose predictor에 들어가는 depth $$D$$를 Depth CNN의 결과로 입력하면 식이 다음과 같이 된다.  
+
+![LKVOLearner4](D:\Work\ian-flow\assets\2019-06-27-vode-survey\LKVOLearner4.png)
+
+DVO에서 출력되는 pose $$\bold{p}$$는 입력 depth에 따라 결정되는 함수이기 때문에 아래와 같이 chain-rule에 의해 pose를 통해서도 depth를 학습할 수 있다.
+
+![LKVOLearner5](D:\Work\ian-flow\assets\2019-06-27-vode-survey\LKVOLearner5.png)
+
+
+
+## Details
+
+- 논문에서 DVO 대신 DDVO (Differential DVO)라고 그냥 DVO와 차이를 두는데 정확한 차이는 참고논문을 읽어봐야 알 것 같다.
+
+- Depth CNN은 inverse depth map을 출력한다.
+
+- 절대적인 스케일을 알 수 없으므로 단순히 $$L_{prior}()$$를 줄이도록 학습하면 전체적인 depth scale이 점점 줄어든다. 그러므로 depth를 다음과 같이 평균으로 나누는 normalization한 결과를 사용한다. normalization은 성능향상에 큰 도움이 된다.
+
+    ![LKVOLearner6](D:\Work\ian-flow\assets\2019-06-27-vode-survey\LKVOLearner6.png)
+
+- 모델에는 이미지가 3장씩 들어가고 4단계의 스케일에서 학습한다.
+
+- Appearance dissimilarity loss ($$L_{ap}()$$)를 학습할 때 가장 아래단계에서는 L1 norm과 SSIM을 섞어서 학습한다.
+
+- 학습 영상에서 움직이지 않는 static 영상은 뺀다.
+
+- Inverse depth의 출력을 sigmoid 함수로 0~1 사이로 바꾸고 10배를 곱하고 0.01을 더하여 nemerical stability를 확보한다.
+
+- 테스트 할 때 depth를 GT에 맞춰 재조정한다. $$\tilde{s} = median(D_{gt}) / median(D_{predict})$$ 
+
+- Cityscapes 데이터셋을 이용하는 경우 Cityscapes 데이터셋으로 pretraining을 한 후 KITTI로 fine tuning을 한다.
 
