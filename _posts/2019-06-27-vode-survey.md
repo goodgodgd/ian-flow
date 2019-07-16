@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "[작성중] Paper Survey: Deep Learning based Visual Odometry and Depth Prediction"
+title:  "Paper Survey: Deep Learning based Visual Odometry and Depth Prediction"
 date:   2019-06-27 09:00:01
-categories: WIP
+categories: research
 
 ---
 
@@ -10,17 +10,35 @@ categories: WIP
 
 # 1. DeepVO
 
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>제목</th>
+<th>DeepVO: Towards End-to-End Visual Odometry with Deep Recurrent Convolutional Neural Networks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">저자</td>
+<td markdown="span">Sen Wang, Ronald Clark, Hongkai Wen and Niki Trigoni (Oxford)</td>
+</tr>
+<tr>
+<td markdown="span">출판</td>
+<td markdown="span">ICRA, 2017</td>
+</tr>
+</tbody>
+</table>
 
-
-
-| 제목 | DeepVO: Towards End-to-End Visual Odometry with Deep Recurrent Convolutional <br> Neural Networks |
-|:--------|:--------|
-| 저자 | Sen Wang, Ronald Clark, Hongkai Wen and Niki Trigoni (Oxford) |
-| 출판 | ICRA, 2017 |
 
 | Mono VO | Depth Prediction | Learning   | Absolute Scale | Open source |
 | ---- | ---------------- | ---------- | -------------- | ------------- |
 | O    | X                | Supervised | O              | X           |
+
+
 
 ## 특징
 
@@ -40,13 +58,29 @@ categories: WIP
 
 # 2. Left-Right Consistency
 
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>제목</th>
+<th>Unsupervised Monocular Depth Estimation with Left-Right Consistency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">저자</td>
+<td markdown="span">Clément Godard, Oisin Mac Aodha, Gabriel J. Brostow (University College London)</td>
+</tr>
+<tr>
+<td markdown="span">출판</td>
+<td markdown="span">CVPR, 2017</td>
+</tr>
+</tbody>
+</table>
 
-
-
-| 제목 | Unsupervised Monocular Depth Estimation with Left-Right Consistency |
-|:--------|:--------|
-| 저자 | Clément Godard, Oisin Mac Aodha, Gabriel J. Brostow (University College London) |
-| 출판 | CVPR, 2017 |
 
 | Mono VO | Depth Prediction | Learning   | Absolute Scale | Open source |
 | ---- | ---------------- | ---------- | -------------- | ------------- |
@@ -97,13 +131,29 @@ Disparity map을 이용해 한쪽 이미지로부터 반대쪽 이미지를 복�
 
 # 3. SfmLearner
 
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>제목</th>
+<th>Unsupervised Learning of Depth and Ego-Motion from Video</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">저자</td>
+<td markdown="span">Tinghui Zhou, Matthew Brown, Noah Snavely, David G. Lowe (google)</td>
+</tr>
+<tr>
+<td markdown="span">출판</td>
+<td markdown="span">CVPR, 2017</td>
+</tr>
+</tbody>
+</table>
 
-
-
-| 제목 | Unsupervised Learning of Depth and Ego-Motion from Video |
-|:--------|:--------|
-| 저자 | Tinghui Zhou, Matthew Brown, Noah Snavely, David G. Lowe (google) |
-| 출판 | CVPR, July 2017 |
 
 | Mono VO | Depth Prediction | Learning   | Absolute Scale | Open source |
 | ---- | ---------------- | ---------- | -------------- | ------------- |
@@ -155,17 +205,29 @@ photometric loss는 다음과 같다. 특정 타겟 이미지($$I_t(p)$$)에서 
 
 # 4. UnDeepVO
 
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>제목</th>
+<th>UnDeepVO: Monocular Visual Odometry through Unsupervised Deep Learning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">저자</td>
+<td markdown="span">Ruihao Li, Sen Wang, Zhiqiang Long and Dongbing Gu</td>
+</tr>
+<tr>
+<td markdown="span">출판</td>
+<td markdown="span">ICRA, 2017</td>
+</tr>
+</tbody>
+</table>
 
-
-
-| 제목 | UnDeepVO: Monocular Visual Odometry through Unsupervised Deep Learning |
-|:--------|:--------|
-| 저자 | Ruihao Li, Sen Wang, Zhiqiang Long and Dongbing Gu |
-| 출판 | ICRA, May 2017 |
-
-| Mono VO | Depth Prediction | Learning   | Absolute Scale | Open source |
-| ---- | ---------------- | ---------- | -------------- | ------------- |
-| O    | O               | Unsupervised | O            | X           |
 
 ## 특징
 
@@ -217,13 +279,29 @@ Temporal image sequences에서는 pose estimator에서 추정한 pose와 depth m
 
 # 5. Deep-VO-Feat
 
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>제목</th>
+<th>Unsupervised Learning of Monocular Depth Estimation and Visual Odometry with Deep Feature Reconstruction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">저자</td>
+<td markdown="span">Huangying Zhan, Ravi Garg, Chamara Saroj Weerasekera, Kejie Li, Harsh Agarwal, Ian M. Reid</td>
+</tr>
+<tr>
+<td markdown="span">출판</td>
+<td markdown="span">CVPR, 2018</td>
+</tr>
+</tbody>
+</table>
 
-
-
-| 제목 | Unsupervised Learning of Monocular Depth Estimation and Visual Odometry <br> with Deep Feature Reconstruction |
-|:--------|:--------|
-| 저자 | Huangying Zhan, Ravi Garg, Chamara Saroj Weerasekera, Kejie Li, Harsh Agarwal, <br>Ian M. Reid |
-| 출판 | CVPR, June 2018 |
 
 | Mono VO | Depth Prediction | Learning   | Absolute Scale | Open source |
 | ---- | ---------------- | ---------- | -------------- | ------------- |
@@ -285,12 +363,29 @@ CVPR 2018부터 SfmLearner와 비슷한 목적을 가진 논문들이 여러 편
 
 # 6. GeoNet
 
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>제목</th>
+<th>GeoNet: Unsupervised Learning of Dense Depth, Optical Flow and Camera Pose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">저자</td>
+<td markdown="span">Zhichao Yin and Jianping Shi</td>
+</tr>
+<tr>
+<td markdown="span">출판</td>
+<td markdown="span">CVPR, 2018</td>
+</tr>
+</tbody>
+</table>
 
-
-| 제목 | GeoNet: Unsupervised Learning of Dense Depth, Optical Flow and Camera Pose |
-|:--------|:--------|
-| 저자 | Zhichao Yin and Jianping Shi |
-| 출판 | CVPR, June 2018 |
 
 | Mono VO | Depth Prediction | Learning   | Absolute Scale | Open source |
 | ---- | ---------------- | ---------- | -------------- | ------------- |
@@ -352,12 +447,29 @@ GeoNet은 아래 그림처럼 두 단계로 구성된다. 첫 번째 단계에�
 
 # 7. LKVOLearner
 
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>제목</th>
+<th>Learning Depth from Monocular Videos using Direct Methods</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">저자</td>
+<td markdown="span">Chaoyang Wang, Jose Miguel Buenaposada, Rui Zhu, Simon Lucey</td>
+</tr>
+<tr>
+<td markdown="span">출판</td>
+<td markdown="span">CVPR, 2018</td>
+</tr>
+</tbody>
+</table>
 
-
-| 제목 | Learning Depth from Monocular Videos using Direct Methods    |
-| :--- | :----------------------------------------------------------- |
-| 저자 | Chaoyang Wang, Jose Miguel Buenaposada, Rui Zhu, Simon Lucey |
-| 출판 | CVPR, June 2018                                              |
 
 | Mono VO | Depth Prediction | Learning     | Absolute Scale | Open source |
 | ------- | ---------------- | ------------ | -------------- | ----------- |
@@ -377,7 +489,7 @@ GeoNet은 아래 그림처럼 두 단계로 구성된다. 첫 번째 단계에�
 
 
 
-![LKVOLearner](D:\Work\ian-flow\assets\2019-06-27-vode-survey\LKVOLearner1.png)
+![LKVOLearner](../assets/2019-06-27-vode-survey/LKVOLearner1.png)
 
 
 
@@ -387,9 +499,9 @@ GeoNet은 아래 그림처럼 두 단계로 구성된다. 첫 번째 단계에�
 
 여기서 특징적인 것은 기존에 back propagation 할 때 depth 보정 신호로만 Depth CNN을 학습하던 것과는 달리 pose 보정신호로부터도 Depth CNN을 학습시킨다는 것이다. 그림의 (2)처럼 pose를 외부에서 받아서 depth만 학습시킨다고 했을 때 수식은 다음과 같다.
 
-![LKVOLearner2](D:\Work\ian-flow\assets\2019-06-27-vode-survey\LKVOLearner2.png)
+![LKVOLearner2](../assets/2019-06-27-vode-survey/LKVOLearner2.png)
 
-![LKVOLearner3](D:\Work\ian-flow\assets\2019-06-27-vode-survey\LKVOLearner3.png)
+![LKVOLearner3](../assets/2019-06-27-vode-survey/LKVOLearner3.png)
 
 - $$f_d()$$: depth predictor
 - $$f_p()$$: pose predictor based on DVO
@@ -400,11 +512,11 @@ GeoNet은 아래 그림처럼 두 단계로 구성된다. 첫 번째 단계에�
 
 여기서 pose predictor에 들어가는 depth $$D$$를 Depth CNN의 결과로 입력하면 식이 다음과 같이 된다.  
 
-![LKVOLearner4](D:\Work\ian-flow\assets\2019-06-27-vode-survey\LKVOLearner4.png)
+![LKVOLearner4](../assets/2019-06-27-vode-survey/LKVOLearner4.png)
 
 DVO에서 출력되는 pose $$\bold{p}$$는 입력 depth에 따라 결정되는 함수이기 때문에 아래와 같이 chain-rule에 의해 pose를 통해서도 depth를 학습할 수 있다.
 
-![LKVOLearner5](D:\Work\ian-flow\assets\2019-06-27-vode-survey\LKVOLearner5.png)
+![LKVOLearner5](../assets/2019-06-27-vode-survey/LKVOLearner5.png)
 
 
 
@@ -416,7 +528,7 @@ DVO에서 출력되는 pose $$\bold{p}$$는 입력 depth에 따라 결정되는 
 
 - 절대적인 스케일을 알 수 없으므로 단순히 $$L_{prior}()$$를 줄이도록 학습하면 전체적인 depth scale이 점점 줄어든다. 그러므로 depth를 다음과 같이 평균으로 나누는 normalization한 결과를 사용한다. normalization은 성능향상에 큰 도움이 된다.
 
-    ![LKVOLearner6](D:\Work\ian-flow\assets\2019-06-27-vode-survey\LKVOLearner6.png)
+    ![LKVOLearner6](../assets/2019-06-27-vode-survey/LKVOLearner6.png)
 
 - 모델에는 이미지가 3장씩 들어가고 4단계의 스케일에서 학습한다.
 
@@ -434,12 +546,29 @@ DVO에서 출력되는 pose $$\bold{p}$$는 입력 depth에 따라 결정되는 
 
 # 8. RNN-MVOD
 
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>제목</th>
+<th>Recurrent Neural Network for (Un-)supervised Learning of Monocular Video Visual Odometry and Depth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">저자</td>
+<td markdown="span">Rui Wang, Stephen M. Pizer, Jan-Michael Frahm</td>
+</tr>
+<tr>
+<td markdown="span">출판</td>
+<td markdown="span">CVPR, 2019</td>
+</tr>
+</tbody>
+</table>
 
-
-| 제목 | Recurrent Neural Network for (Un-)supervised Learning of Monocular Video Visual <br>Odometry and Depth |
-| :--- | :----------------------------------------------------------- |
-| 저자 | Rui Wang, Stephen M. Pizer, Jan-Michael Frahm                |
-| 출판 | CVPR, June 2019                                              |
 
 | Mono VO | Depth Prediction | Learning                     | Absolute Scale | Open source |
 | ------- | ---------------- | ---------------------------- | -------------- | ----------- |

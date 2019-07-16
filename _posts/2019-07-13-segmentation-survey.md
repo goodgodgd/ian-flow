@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "RGB(-D) Image Segmentation Survey"
-date:   2000-07-13 09:00:01
+date:   2019-07-13 09:00:01
 categories: research
 
 ---
@@ -111,17 +111,13 @@ Encoder에서 max pooling으로 feature map의 해상도를 줄이는 이유는
 
 이것은 원래 영상 분류 작업에 적합한 구조고 segmentation에서는 픽셀 단위의 세부 정보를 잃어버리는 것이므로 segmentation의 정확도가 떨어지는 원인이 된다. 그래서 *DeepLab*에서는 max pooling을 줄이고 feature map의 크기를 늘리는 대신 수용 영역(receptive field)를 늘리기 위해 **atrous convolution**을 제안한다. 다른 논문에는 dilated convolution 이라는 용어로도 쓰인다.
 
+| <img src="../assets/2019-07-13-segmentation-survey/same_padding_no_strides.gif" alt="normal conv" width="300"/> |
+| ===== |
+| 일반적인 convolution, [출처](<https://github.com/vdumoulin/conv_arithmetic>) |
 
-
-![normal conv](../assets/2019-07-13-segmentation-survey/same_padding_no_strides.gif)
-
-(일반적인 convolution, [출처](<https://github.com/vdumoulin/conv_arithmetic>))
-
-
-
-![dilated conv](../assets/2019-07-13-segmentation-survey/dilated_conv.gif)
-
-(Atrous convolution, [출처](<https://github.com/vdumoulin/conv_arithmetic>))
+| <img src="../assets/2019-07-13-segmentation-survey/dilated_conv.gif" alt="dilated conv" width="300"/> |
+| ===== |
+| Atrous convolution, [출처](<https://github.com/vdumoulin/conv_arithmetic>)|
 
 
 
@@ -134,16 +130,18 @@ Encoder에서 max pooling으로 feature map의 해상도를 줄이는 이유는
 어떤 사물은 영상에서 크게 나오고 어떤건 작게 나오는데 너무 큰 건 영상 전체를 고려해야 하므로 픽셀 단위로 추론하기 어렵고 너무 작은건 신호가 약해서 묻히기 쉽다. CNN 구조에 따라 분리하기 '적당한' 사이즈의 사물만 잘 분리하게 된다. 이 문제를 해결하는 가장 간단한 방법은 하나의 입력 영상을 여러 크기로 바꿔서 입력하는 것이다. 큰 물체를 찾기 위해서는 이미지를 줄여서 넣고 작은 물체를 찾기 위해서는 이미지를 키워서 넣는 것이다. 하지만 이 방법은 여러번 연산을 해야하기 때문에 낭비가 심하다. *DeepLab*에서 제안한 방법은 **Atrous Spatial Pyramid Pooling (ASPP)**이다. 이것은 입력 feature에 간격이 다른 여러개의 atrous conv.를 따로 적용후 다시 합치는 것인데 Inception의 개념과 비슷하다. 간격이 넓은 필터를 통과해 만든 feature에서는 상대적으로 큰 사물을 찾기에 적합하고, 간격이 좁은 필터를 통과한 feature에서는 작은 사물을 찾기에 적합하다. 마지막에 Multi-scale의 feature map들을 합치면 다양한 크기의 사물들을 분리해낼 수 있다.
 
 
+| ![deeplab1](../assets/2019-07-13-segmentation-survey/deeplab1.png) |
+| ===== |
+| Atrous Spatial Pyramid Pooling (ASPP) [출처](http://inhi.kim/archives/date/2018/05) |
 
-{% include image_with_caption.html url="../assets/2019-07-13-segmentation-survey/deeplab1.png" description="Atrous Spatial Pyramid Pooling (ASPP) <br> http://inhi.kim/archives/date/2018/05" %}
+| <img src="../assets/2019-07-13-segmentation-survey/deeplab2.png" alt="deeplab2" width="400"/> |
+| ===== |
+| Inception Model [출처](https://www.kdnuggets.com/2017/08/intuitive-guide-deep-network-architectures.html) |
 
+| ![deeplab3](../assets/2019-07-13-segmentation-survey/deeplab3.png) |
+| ===== |
+| DeepLab의 CNN 구조 [출처](https://towardsdatascience.com/review-deeplabv3-atrous-convolution-semantic-segmentation-6d818bfd1d74) |
 
-
-{% include image_with_caption.html url="../assets/2019-07-13-segmentation-survey/deeplab2.png" description="Inception Model, <br> https://www.kdnuggets.com/2017/08/intuitive-guide-deep-network-architectures.html" %}
-
-
-
-{% include image_with_caption.html url="../assets/2019-07-13-segmentation-survey/deeplab3.png" description="DeepLab의 CNN 구조, <br> https://towardsdatascience.com/review-deeplabv3-atrous-convolution-semantic-segmentation-6d818bfd1d74" %}
 
 
 
@@ -234,7 +232,126 @@ Mask R-CNN은 객체를 검출하고 분류하고 픽셀단위로 분리해낼 �
 
 
 
-## 3.1. 3D-SIS
+## 3.1. PointNet (++)
+
+**제목**: "PointNet: Deep Learning on Point Sets for 3D Classification and Segmentation"
+
+| 출판정보   | 피인용 횟수 | Semantic | Instance | Open source |
+| ---------- | ----------- | -------- | -------- | ----------- |
+| CVPR, 2017 | 1020        | O        | X        | O           |
+
+*PointNet*은 3차원 point cloud를 직접 처리할 수 있는 네트워크 구조를 제안했다. 이전까지 딥러닝으로 3차원 데이터를 다루는 방법은 3차원 공간을 일정한 크기의 voxel로 나누어 3차원 컨볼루션(**3D Conv**)을 하던지 아니면 3차원 모델을 여러 시점에서 렌더링한 Multi-View 이미지를 입력으로 넣어 2D 이미지처럼 2D Conv를 적용하기도 했다. 이러한 방법도 나름 효과는 있었지만 3D Conv를 쓰는건 연산도 많이 들고 point cloud를 voxel로 변환하면서 공간 해상도가 많이 떨어지고, Multi-View는 3차원 공간 자체를 이해하지 못한다는 단점이 있다.   
+
+Point cloud를 직접 네트워크에 입력하지 못하는 이유는
+
+1. Point의 개수가 정해지지 않아 입력 데이터의 차원이 일정하지 않고
+2. 정렬되지 않은 point들이 들어왔을 때 이를 일정한 방법으로 정렬시킬 방법이 없다. 
+
+이러한 문제로 point cloud를 DNN으로 직접 처리하기 어려웠는데 PointNet의 구조는 point의 개수나 정렬순서에 상관 없이 사물 분류나 분리(segmentation)을 했다는 점에서 혁신적이라 할 수 있다. 이 논문을 학회장에서 처음 봤을때는 이게 돼? 왜 되지? 이상한 구조네... 하고 지나갔던 기억이 난다. 하지만 이제는 3차원 인식에서 꽤 유명한 논문이 되었다.  
+
+*PointNet*은 point cloud 단위이 모양 분류나 semantic segementation을 수행한다. 다음은 segmentation 결과다.
+
+![pointnet3](../assets/2019-07-13-segmentation-survey/pointnet3.png)
+
+
+
+### A. 구조
+
+이 논문은 아래 구조만 이해하면 된다. 
+
+
+![pointnet1](../assets/2019-07-13-segmentation-survey/pointnet1.png)
+
+
+
+1. n개의 입력 point를 $$n\times3$$  차원의 데이터로 입력한다.
+
+2. T-Net: 입력을 T-Net에 입력하여 $$3\times3$$ 변환 행렬(transformation matrix)을 출력한다.
+
+3. 입력에 2의 변환 행렬을 곱하여 점들이 이동, 회전 등에 영향을 받지 않도록 변환한다.
+
+4. mlp (64,64): 각각의 3차원 point 데이터에 대해 동일한 MLP(Multi Layer Perceptron)를 반복 적용하여 각 point feature의 차원을 64차원으로 늘린다.
+
+    <img src="../assets/2019-07-13-segmentation-survey/pointnet2.png" alt="pointnet2" width="300"/>
+
+5. T-Net: 2와 마찬가지로 T-Net을 적용하여 feature들이 점들의 이동, 회전 등에 영향을 받지 않도록 변환한다.
+
+6. mlp (64,128,1024): 각 point에 해당하는 feature vector에 대해서 동일한 MLP를 반복 적용하여 feature의 차원을 1024로 늘린다.
+
+7. max pool: $$n\times1024$$ 차원의 feature map에 max pooling을 적용하여 1024차원의 global feature를 만든다.
+
+8. mlp (512,256,k): global feature에 MLP를 적용하여 point cloud의 클래스를 분류한다.
+
+9. 4의 64차원 feature와 7의 1024차원 global feature를 합쳐서 1088차원의 feature map을 만든다.
+
+10. 각각의 point feature에 대해 동일한 MLP를 반복 적용하여 각 point를 분류한다.
+
+여기서의 핵심은 6~7 단계다.  
+
+- 6에서 max pooling을 통해 입력 데이터의 크기(n)에 상관없이 똑같은 크기로 합쳐버린다. (max pooling을 통해 1024차원 출력) 
+- 이렇게 만들어진 global feature가 local feature와 합쳐진다. 합쳐진 1088차원의 벡터는 부분적인 특징과 전체적인 특징을 모두 알게된다.
+- segmentation을 point단위의 독립적인 분류 작업으로 생각해서 데이터 크기에 상관없이 segmentation이 가능하다.
+
+
+
+### B. PointNet++
+
+**제목**: "PointNet++: Deep Hierarchical Feature Learning on Point Sets in a Metric Space"
+
+| 출판정보   | 피인용 횟수 | Semantic | Instance | Open source |
+| ---------- | ----------- | -------- | -------- | ----------- |
+| NIPS, 2017 | 563         | O        | X        | O           |
+
+PointNet 이후로 이를 응용한 논문들이 여러개 나왔다. *PointNet++*은 같은 저자의 후속편이다. 영상 분리 연구에서 CNN이 잘 작동하는 것은 컨볼루션을 반복하면서 아주 좁은 지역적인 특성부터 전체적인 특성까지 *점진적으로* 시야를 넓혀가며 고차원적인 특징을 뽑아낼 수 있기 때문이다. 그런데 *PointNet*은 중간과정 없이 point 단위의 특징에 point cloud 전체적인 특징을 바로 붙여버려서 지역적인 구조를 이해하지 못 한다는 단점이 있다. 이를 해결하기 위해 저자가 생각한 방법은 *PointNet* 자체를 컨볼루션처럼 쓰는 것이다. Point cloud를 작은 단위로 나눠서 *PointNet*을 통과시켜 나오는 global feature가 여기서는 local feature가 된다. 아래 그림을 보면 이해가 된다.
+
+
+
+![pointnet4](../assets/2019-07-13-segmentation-survey/pointnet4.png)
+
+
+
+1. 입력 데이터를 작은 그룹으로 묶고 각 그룹에 *PointNet*을 적용해 그룹마다 feature vector를 뽑는다. 
+2. feature vector들을 다시 그룹으로 묶고 다시 *PointNet*을 적용한다. 
+3. 줄어든 feature vector들을 이용해 classification과 segmentation을 진행한다.
+
+이렇게 하면 세부적인 구조를 더 잘 파악하게 되어 분류(classification)나 분리(segmentation) 성능이 올라간다고 한다. 다음은 결과 영상이다.
+
+![pointnet5](../assets/2019-07-13-segmentation-survey/pointnet5.png)
+
+
+
+### C. Frustum PointNets
+
+**제목**: "Frustum PointNets for 3D Object Detection from RGB-D Data"
+
+| 출판정보   | 피인용 횟수 | Semantic | Instance | Open source |
+| ---------- | ----------- | -------- | -------- | ----------- |
+| CVPR, 2018 | 174         | O        | O        | O           |
+
+이것도 역시 PointNet을 응용한 연구다. Frustum이란 우리말로 절두체인데 원뿔이나 피라미드 모양에서 꼭대기를 자른 모양을 말한다. 아래 그림을 보면 2D 영상에서 자동차의 bounding box를 먼저 찾고 그 박스의 방향으로 Frustum을 그린 것이다. *Frustum PointNets*의 기본 아이디어는 2D 이미지에서 detection과 classification을 한 다음에 절두체 내부의 point cloud에 PointNet을 적용하여 segmentation과 3D box detection을 해결한다는 것이다. *Mask R-CNN*에서 먼저 detection을 한 다음 그 범위에서 segmentation을 하는 것과 비슷한 흐름이다.
+
+![pointnet6](../assets/2019-07-13-segmentation-survey/pointnet6.png)
+
+
+
+자세한 구조는 다음과 같다.
+
+![pointnet7](../assets/2019-07-13-segmentation-survey/pointnet7.png)
+
+1. RGB 영상으로부터 *PSPNet*을 적용하여 영상에서의 2D bounding box를 찾는다.
+2. 2D bounding box 범위 내의 depth를 point cloud로 변환한다.
+3. *PointNet*을 이용하여 객체와 배경을 분리한다.
+4. 객체의 point cloud만 추출해서 *PointNet*을 통해 3D bounding box를 추정한다.
+
+여기서 유의할 점은 4번에서 하는 일이 단순히 객체의 범위를 찾아서 box를 치는게 아니라 객체를 이해하고 현재 시점에서 보이지 않는 부분까지 포함한 3D box의 범위와 방향까지 추정한다는 것이다. 예를 들어 차를 검출했다고 하면 현재는 차의 앞부분만 point cloud에 보이지만 보이지 않는 뒷부분까지 포함할 수 있는 3D box를 자동차의 방향에 맞춰서 그려준다는 것이다. 이것을 논문에서는 *Amodal 3D box estimation*이라고 한다.
+
+다음은 결과 영상이다. 객체의 방향에 맞춰 box가 회전이 되어있고 보이지 않는 부분까지 box가 늘어나 있는 것을 볼 수 있다.
+
+![pointnet8](../assets/2019-07-13-segmentation-survey/pointnet8.png)
+
+
+
+## 3.2. 3D-SIS
 
 **제목**: "3D-SIS: 3D Semantic Instance Segmentation of RGB-D Scans"
 
@@ -250,7 +367,7 @@ Mask R-CNN은 객체를 검출하고 분류하고 픽셀단위로 분리해낼 �
 
 공간적인 데이터에서 고차원적인 특징을 추출하기 위해서는 컨볼루션을 쓰는게 상식적인데 3차원 point cloud는 형태가 일정하지 않아서 컨볼루션을 하기에 적합하지 않다. 그래서 일정한 크기를 가진 grid voxel 데이터로 변환해주어야 한다. 여기서는 KinectFusion 등으로 만들수 있는 **Truncated Signed Distance Field (TSDF)**로 3차원 표면을 표현했다. TSDF는 표면으로부터 voxel의 거리를 표면 안쪽은 음수로 바깥쪽은 양수로 표현하여 voxel에 거리값을 채운 3차원 표면을 표현하는 방법이다. 아래 그림에서 얼굴 표면에 해당하는 voxel에는 0이 들어있고 주변에는 voxel과의 거리가 채워져 있다. 표면에서 멀리 떨어진 voxel에는 최대 값인 -1, +1들이 채워져있다. 아래 그림은 2차원이지만 실제로는 3차원 voxel이 이렇게 채워지는 것이다.
 
-![1563118292343](../assets/2019-07-13-segmentation-survey/1563118292343.png)
+![3dsis2](../assets/2019-07-13-segmentation-survey/3dsis2.png)
 
 
 
@@ -260,21 +377,19 @@ Mask R-CNN은 객체를 검출하고 분류하고 픽셀단위로 분리해낼 �
 
 때문에 컨볼루션 커널도 kw * kh * Channels 의 크기를 가져야한다. 커널이 가로 세로축으로만 움직이기 때문에 커널의 채널수는 입력과 같아야 한다. 애니메이션으로 표현하면 다음과 같다.
 
-
-
-{% include image_with_caption.html url="../assets/2019-07-13-segmentation-survey/conv2d.gif" description="2D convolution <br> https://cntk.ai/pythondocs/CNTK_103D_MNIST_ConvolutionalNeuralNetwork.html" %}
-
-
+| <img src="../assets/2019-07-13-segmentation-survey/conv2d.gif" alt="conv3d" width="350"/> |
+| ===== |
+| 2D convolution [출처](https://cntk.ai/pythondocs/CNTK_103D_MNIST_ConvolutionalNeuralNetwork.html) |
 
 3차원 데이터에서는 feature map이 4차원이다. 아래 그림에서 3차원 grid는 실제 공간적인 3차원이고 각 grid cell 마다 feature vector가 들어있는 것이다. 그러므로 feature map은 Width * Height * Depth * Channels의 차원을 가진다. 이에 따라 컨볼루션 커널도 3차원 공간을 움직이게 되므로 kw * kh * kd * Channels 차원을 가져야한다.
 
+| <img src="../assets/2019-07-13-segmentation-survey/conv3d.gif" alt="conv3d" width="350"/> |
+| ===== |
+| 2D convolution [출처](http://inhi.kim/archives/date/2018/05) |
 
 
-{% include image_with_caption.html url="../assets/2019-07-13-segmentation-survey/3dconv.gif" description="3D convolution <br> http://inhi.kim/archives/date/2018/05" %}
 
-
-
-### 3D-SIS 구조
+### C. 3D-SIS 구조
 
 3D-SIS에서는 세 가지 작업을 수행한다.
 
@@ -291,15 +406,15 @@ Mask R-CNN은 객체를 검출하고 분류하고 픽셀단위로 분리해낼 �
 1. RGB 이미지들로부터 2차원 컨볼루션을 반복하여 2D feature map들을 만든다.
 2. Back Projection: 2D feature를 픽셀 별로 해당하는 voxel을 찾아 그곳에 저장한다.
 3. View Pooling: 하나의 voxel에는 여러 이미지에서 들어온 feature vector들이 들어있다. 여러 feature vector에 대해 max pooling을 하여 하나의 feature vector로 합친다.
-4. 3D Gemetry (3차원 좌표)와 3D Features (grid voxel에 들어있는 feature)에 대해 각각 3차원 컨볼루션을 적용한다.
-5. 두 가지 3D feature map을 합치고 다시 3차원 컨볼루션을 한다.
-6. 5에서 만든 것은 수용 영역이 작으므로 한번 더 3차원 컨볼루션을 해서 수용 영역을 늘린 feature map을 만든다.
+4. 3D Gemetry (3차원 좌표)와 3D Features (grid voxel에 들어있는 feature)에 대해 각각 3D Conv을 적용한다.
+5. 두 가지 3D feature map을 합치고 다시 3D Conv을 한다.
+6. 5에서 만든 것은 수용 영역이 작으므로 한번 더 3D Conv을 해서 수용 영역을 늘린 feature map을 만든다.
 7. 5의 feature map에서는 작은 anchor box를 쓰고 6에서는 큰 anchor box를 설정해놓고 anchor box마다 각 클래스의 물체에 대한 bound box를 추정한다. (objectness)
 8. 7에서 구한 bound box 안에 들어있는 feature map 영역을 잘래내고 이를 일정한 크기로 맞추기 위해 RoI Pooing을 한다. 그런 다음 feature를 1차원 벡터로 펴고 fully connected layer를 더해 bound box 내부 객체의 종류를 분류한다.
 9. mask prediction을 위한 feature map을 따로 만든다. 여기서는 feature map의 해상도를 줄이지 않는다. (96x96x48 유지)
-10. 두 feature map을 합친 후 다시 3차원 컨볼루션을 한다.
+10. 두 feature map을 합친 후 다시 3D Conv을 한다.
 11. 8에서 찾은 bounding box에 해당하는 feature map 영역을 잘라낸다.
-12. 3차원 컨볼루션을 적용하여 각 voxel의 특정 클래스(물체 종류)에 속할 확률을 추론한다.
+12. 3D Conv을 적용하여 각 voxel의 특정 클래스(물체 종류)에 속할 확률을 추론한다.
 
 
 
