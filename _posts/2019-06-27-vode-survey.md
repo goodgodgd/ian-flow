@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Paper Survey: Deep Learning based Visual Odometry and Depth Prediction"
+title:  "[Survey] Deep Learning based Visual Odometry and Depth Prediction"
 date:   2019-06-27 09:00:01
 categories: research
 
@@ -583,7 +583,7 @@ DVO에서 출력되는 pose $$\bold{p}$$는 입력 depth에 따라 결정되는 
 - DepthNet의 encoder와 PoseNet에 ConvLSTM block이 CNN layer처럼 여러번 들어간다. 아래 그림에서 빨간색 블럭이 ConvLSTM이다.
 - DepthNet에서 출력한 depth map이 PoseNet의 입력으로 들어간다. Depth와 pose의 스케일을 맞추는 효과가 있을수 있다.
 - LSTM에 과거 데이터가 있으므로 DepthNet은 물론 PoseNet에도 과거 영상을 입력하지 않는다. 오직 현재 영상과 depth map을 넣어서 pose를 출력한다.
-- 현재 영상만 넣으니 PoseNet이 마치 absolute pose를 출력할 것 같지만 실제 출력은 직전 프레임과의 relative pose를 출력한다.
+- 현재 영상만 넣으니 PoseNet이 마치 absolute pose를 출력할 것 같지만 실제 출력은 직전 프레임과의 relative pose를 출력한다.
 
 
 
@@ -601,7 +601,7 @@ DVO에서 출력되는 pose $$\bold{p}$$는 입력 depth에 따라 결정되는 
 - 그림의 DGM (differentiable geometric module)은 영상을 warping 해주는 모듈이다. 
 - Forward/backward 학습을 통해 데이터를 더 많이 활용할 수 있을 뿐만 아니라 forward-backward consistency까지 학습할 수 있다. 
 - 일단 학습이 되고나면 임의의 길이의 sequence를 입력으로 받아 테스트할 수 있다.
-- 학습 속도를 올리기 위해 한 쌍의 연속이미지로만 먼저 20 epoch 학습하고 multi view reprojection으로 10 epoch 동안 fine tuing한다.
+- 학습 속도를 올리기 위해 한 쌍의 연속이미지로만 먼저 20 epoch 학습하고 multi view reprojection으로 10 epoch 동안 fine tuing한다.
 
 
 
@@ -625,7 +625,7 @@ Loss를 연속적인 이미지들끼리만 계산하는 것이 아니라 N개의
 
 ### Forwad-backward Flow Consistency Loss
 
-Pose와 depth map이 출력되면 이를 이용해 warped image를 만들수 있고 또한 optical flow ($$F_{A \to B}, F_{B \to A}$$)도 계산된다.  두 flow는 서로 역관계에 있기 때문에 $$-F_{B \to A}$$를 warping 하면 $$F_{A \to B}$$를 구할 수 있다. $$\phi$$는 warping 함수다.
+Pose와 depth map이 출력되면 이를 이용해 warped image를 만들수 있고 또한 optical flow ($$F_{A \to B}, F_{B \to A}$$)도 계산된다.  두 flow는 서로 역관계에 있기 때문에 $$-F_{B \to A}$$를 warping 하면 $$F_{A \to B}$$를 구할 수 있다. $$\phi$$는 warping 함수다.
 
 ![RNN-MVOD5](../assets/2019-06-27-vode-survey/RNN-MVOD5.png)
 

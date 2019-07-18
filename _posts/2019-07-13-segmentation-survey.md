@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "RGB(-D) Image Segmentation Survey"
+title:  "[Survey] RGB(-D) Image Segmentation"
 date:   2019-07-13 09:00:01
 categories: research
 
