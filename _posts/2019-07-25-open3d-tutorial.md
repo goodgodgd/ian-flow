@@ -109,7 +109,7 @@ LIBS += -L<install path>/open3d/lib \
 
 # 3. Open3D Tutorial (C++)
 
-이 포스트에서 주로 다루는 것은 Open3D에 대한 C++ API를 사용하는 방법이다. Python으로 사용하는 방법은 이미 공식문서가 너무 잘되어 있어서 필요하면 언제든 보고 따라할 수 있다. [(Python Basic Tutorial)](http://www.open3d.org/docs/release/tutorial/Basic/index.html) 여기서는 공식 문서에서는 다루지 않지만 회사에서 더 많이 쓰이는 C++로 사용하는 방법에 대해 설명하고자 한다. 문서화 되진 않았지만 C++도 [API reference](http://www.open3d.org/docs/release/cpp_api/index.html)와, [예제](https://github.com/intel-isl/Open3D/tree/master/examples/Cpp)를 제공하여 사용법을 알 수 있게 해놓았다. 여기서 다루는 주제는 크게 두 가지다.
+이 포스트에서 주로 다루는 것은 Open3D에 대한 C++ API를 사용하는 방법이다. Python으로 사용하는 방법은 이미 공식문서가 잘되어 있어서 필요하면 언제든 보고 따라할 수 있다. [(Python Basic Tutorial)](http://www.open3d.org/docs/release/tutorial/Basic/index.html) 여기서는 공식 문서에서는 다루지 않지만 회사에서 더 많이 쓰이는 C++로 사용하는 방법에 대해 설명하고자 한다. 문서화 되진 않았지만 C++도 [API reference](http://www.open3d.org/docs/release/cpp_api/index.html)와, [예제](https://github.com/intel-isl/Open3D/tree/master/examples/Cpp)를 제공하여 사용법을 알 수 있게 해놓았다. 여기서 다루는 주제는 크게 두 가지다.
 
 1. **File IO and Visualization**: 파일에서 데이터를 읽고 화면에서 확인 후 저장하는 방법을 익힌다.
 2. **Point Cloud Registration**: point cloud를 ICP를 통해 정합해보고 RGB 정보를 이용한 ICP도 알아본다.
@@ -131,7 +131,13 @@ LIBS += -L<install path>/open3d/lib \
 
 ## 3.1 File IO and Visualization
 
-OpenCV에서 제공하지 않는 point cloud를 저장하는 `.pcd` 파일 형식이나 mesh를 저장하는 `.ply` 형식을 읽어주는 것만으로도 Open3D는 써볼 가치가 있다. 
+OpenCV에서 제공하지 않는 point cloud를 저장하는 `.pcd` 파일 형식이나 mesh를 저장하는 `.ply` 형식을 읽어주는 것만으로도 Open3D는 써볼 가치가 있다.  
+
+아래 링크들은 이와 관련된 Python 튜토리얼이다. Python 튜토리얼을 보면 관련 내용에 대한 설명이 있고 C++에도 비슷한 클래스와 함수들이 있기 때문에 도움이 된다.  
+
+- FileIO: <http://www.open3d.org/docs/release/tutorial/Basic/file_io.html>  
+
+- Visualization: <http://www.open3d.org/docs/release/tutorial/Basic/visualization.html>  
 
 
 
@@ -409,7 +415,18 @@ Point Cloud Registration이란 비슷한 모양을 가진 두 개의 point cloud
 3. Colored ICP: ICP에서 점들 사이의 연결관계를 찾을 때 color 정보까지 이용하여 더욱 정확하고 빠르게 수렴시키는 알고리즘이다.
 4. Global registration: 위의 ICP 알고리즘들은 약간 틀어진 두 개의 point cloud를 정합할 수 있는 local regitration 알고리즘이다. 하지만 두 point cloud의 자세가 크게 다르면 ICP를 통해 정합할 수 없다. Global registration은 feature 매칭을 통해 global correspondence를 찾아 초기 자세에 상관없이 정합할 수 있는 알고리즘이다.
 
-여기서는 2번과 3번 알고리즘을 사용하는 예제를 공부한다.
+여기서는 2번과 3번 알고리즘을 사용하는 예제를 공부한다.   
+
+아래 링크들은 관련된 Python 튜토리얼 링크다.  
+
+- ICP registration: <http://www.open3d.org/docs/release/tutorial/Basic/icp_registration.html>
+- Colored point cloud registration: <http://www.open3d.org/docs/release/tutorial/Advanced/colored_pointcloud_registration.html>
+- RGBD odometry: <http://www.open3d.org/docs/release/tutorial/Basic/rgbd_odometry.html>
+- Global registration: <http://www.open3d.org/docs/release/tutorial/Advanced/global_registration.html>
+
+
+
+### 3.2.0 Registration Parameters
 
 Registration에 필요한 파라미터들은 `RegPar`라는 namespace에 미리 입력해두었다.
 
@@ -624,4 +641,30 @@ void RegistrationExamples::IcpColoredPointCloud(const char* srcpcdfile,
 정합된 두 개의 point cloud를 보면 거의 두 개가 구분이 되지 않을 정도로 잘 포개진 것을 볼 수 있다.
 
 ![colored-ICP-after](../assets/2019-07-25-open3d-tutorial/colored-ICP-after.png)
+
+
+
+
+
+# 4. Other Useful Funcitons
+
+위에서 소개하지 못한 유용한 알고리즘들을 Python 튜토리얼을 통해 소개한다.
+
+1. Multiway registration: pose-graph optimization을 통해 여러개의 point cloud가 가장 잘 정합될 수 있는 각 point cloud의 pose를 계산한다. 한마디로, SLAM을 한다.
+
+   <http://www.open3d.org/docs/release/tutorial/Advanced/multiway_registration.html>
+
+2. Point cloud outlier removal: 말 그대로 point cloud에서 outlier를 제거한다.
+
+   <http://www.open3d.org/docs/release/tutorial/Advanced/pointcloud_outlier_removal.html>
+
+3. RGBD integration: TSDF 기술을 이용하여 연속된 RGBD 영상들과 그때의 camera pose가 있으면 이를 모아서 TSDFVolume 으로 만들어준다. 이를 좀 더 간단한 mesh 형태로 변환해 저장할 수도 있다.
+
+   <http://www.open3d.org/docs/release/tutorial/Advanced/rgbd_integration.html>
+
+4. PointNet++: Open3D 기반으로 point cloud를 처리해서 Tensorflow로 PointNet++을 학습시키는 프로젝트가 공개돼있다. 코드는 있지만 아쉽게도 이미 학습된 모델은 보이지 않는다.
+
+   <https://github.com/intel-isl/Open3D-PointNet2-Semantic3D>
+
+
 
