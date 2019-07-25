@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "[Survey] Visual Odometry and vSLAM"
-date:   2019-07-17 09:00:01
+title:  "[WIP] Visual Odometry and vSLAM"
+date:   2010-07-17 09:00:01
 categories: research
 ---
 
@@ -9,7 +9,7 @@ categories: research
 
 
 
-이 포스트는 Visual odometry (VO)와 Visual Simultaneous Localization and Mapping (vSLAM) 분야의 주요 논문들을 소스코드와 함께 분석하여 요약한다.  
+이 포스트는 Visual odometry (VO)와 Visual Simultaneous Localization and Mapping (vSLAM) 분야의 주요 논문들을 분석하여 요약한다.  
 
 
 
@@ -141,17 +141,9 @@ Keyframe이 추가되면 covisibility graph에 새로운 노드를 추가하고 
 
 
 
-코드에서 keyframe 이 가지고 있는 정보
-
-
-
-
-
 ### Covisibility Graph
 
 covisibility graph는 keyframe 사이의 관계를 나타낸 것으로 최소 15개의 map point를 공유한 keyframe들이 연결되고 공유 map point의 개수가 edge의 weight가 된다.
-
-
 
 
 
@@ -185,216 +177,144 @@ Loop closing은 DBoW2로 발견하는데 발견하면 일단 pose-graph optimiza
 
 
 
-## Code
+# 2. DSO
 
-### main
-
-스테레오 카메라를 이용하는 경우를 위주로 코드를 분석해보자. 메인 함수는 `Examples` 폴더에 센서 별, 데이터셋 별로 따로 작성되어있다. 메인 함수에서는 `System` 클래스를 생성하고 `System::TrackStereo()`를 프레임마다 부른다.
-
-```cpp
-int main(int argc, char **argv)
-{
-    // ...
-    ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::STEREO,true);
-    // ...
-    for(int ni=0; ni<nImages; ni++)
-    {
-        imLeft = cv::imread(vstrImageLeft[ni],CV_LOAD_IMAGE_UNCHANGED);
-        imRight = cv::imread(vstrImageRight[ni],CV_LOAD_IMAGE_UNCHANGED);
-        SLAM.TrackStereo(imLeft,imRight,tframe);
-    }
-}
-```
-
- 
-
-### System
-
-`System` 클래스 생성자에서는 `LocalMapping`와 `LoopClosing` 클래스를 thread로 시작한다.  
-
- `System::TrackStereo()`에서는 `Tracking::GrabImageStereo()`를 부른다.
-
-```cpp
-// System.cc
-System::System(...) :...
-{
-    //Load ORB Vocabulary
-    mpVocabulary = new ORBVocabulary();
-    bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
-
-    //Create KeyFrame Database
-    mpKeyFrameDatabase = new KeyFrameDatabase(*mpVocabulary);
-    //Create the Map
-    mpMap = new Map();
-
-    //Initialize the Tracking thread
-    mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
-                             mpMap, mpKeyFrameDatabase, strSettingsFile, mSensor);
-
-    //Initialize the Local Mapping thread and launch
-    mpLocalMapper = new LocalMapping(mpMap, mSensor==MONOCULAR);
-    mptLocalMapping = new thread(&ORB_SLAM2::LocalMapping::Run,mpLocalMapper);
-
-    //Initialize the Loop Closing thread and launch
-    mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpVocabulary, mSensor!=MONOCULAR);
-    mptLoopClosing = new thread(&ORB_SLAM2::LoopClosing::Run, mpLoopCloser);
-
-    //Initialize the Viewer thread and launch
-    if(bUseViewer)
-    {
-        mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile);
-        mptViewer = new thread(&Viewer::Run, mpViewer);
-        mpTracker->SetViewer(mpViewer);
-    }
-
-    //Set pointers between threads
-    mpTracker->SetLocalMapper(mpLocalMapper);
-    mpTracker->SetLoopClosing(mpLoopCloser);
-
-    mpLocalMapper->SetTracker(mpTracker);
-    mpLocalMapper->SetLoopCloser(mpLoopCloser);
-
-    mpLoopCloser->SetTracker(mpTracker);
-    mpLoopCloser->SetLocalMapper(mpLocalMapper);
-}
-
-
-cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp)
-{
-	// 모드 확인 ...
-    cv::Mat Tcw = mpTracker->GrabImageStereo(imLeft,imRight,timestamp);
-	// ...
-    return Tcw;
-}
-```
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>제목</th>
+<th>Direct Sparse Odometry</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">저자</td>
+<td markdown="span">Jakob Engel, Vladlen Koltun, and Daniel Cremers</td>
+</tr>
+<tr>
+<td markdown="span">출판</td>
+<td markdown="span">TPAMI, 2018</td>
+</tr>
+<tr>
+<td markdown="span">분류</td>
+<td markdown="span">Relative scale, VO</td>
+</tr>
+<tr>
+<td markdown="span">github</td>
+<td markdown="span">https://github.com/JakobEngel/dso</td>
+</tr>
+</tbody>
+</table>
 
 
 
-### Tracking
+## 서론
 
-Tracking 코드는 다음과 같다. `Tracking::GrabImageStereo()` -> `Tracking::Track()` -> `Tracking::TrackReferenceKeyFrame()` -> `Optimizer::PoseOptimization()` 순서로 현재 프레임의 포즈를 추적한다.
+ORB-SLAM이 feature-based SLAM의 대표격이라면 direct SLAM의 대표격으로는 LSD-SLAM이 있는데 LSD-SLAM은 이제 좀 지나기도 했고 그보단 같은 저자의 최근 논문인 DSO를 소개하는게 나을 듯 하다. (DSO는 SLAM은 아니고 VO지만 뭐... 그게 그거다.)  
 
-```cpp
-cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp)
-{
-    mImGray = imRectLeft;
-    cv::Mat imGrayRight = imRectRight;
-	// 영상 gray 변환 ...
-    // 프레임 생성
-    mCurrentFrame = Frame(mImGray,imGrayRight,timestamp,mpORBextractorLeft,mpORBextractorRight,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
-    
-    Track();
-    
-    return mCurrentFrame.mTcw.clone();
-}
+이 논문은 서론이 인상적이다. 그 전까지는 VO를 feature-based와 direct 두 가지 흐름으로 이해하고 있었다. 저자는 영상을 localization에 사용하는 방법에 두 가지 분류 기준이 있고 총 네 가지 종류의 VO가 있다고 한다.  
 
-void Tracking::Track()
-{
-    if(mState==NOT_INITIALIZED)
-        StereoInitialization();
-    else
-    {
-        if(mState==OK)
-        {
-            // Local Mapping might have changed some MapPoints tracked in last frame
-            CheckReplacedInLastFrame();
-            bOK = TrackReferenceKeyFrame();
-        }
-        else
-            bOK = Relocalization();
+**Direct vs Indirect**
 
-        // If we have an initial estimation of the camera pose and matching. Track the local map.
-        if(!mbOnlyTracking)
-            bOK = TrackLocalMap();
+- Direct: 센서 입력 자체를 그대로 사용하는 방법이다. 영상의 경우 픽셀값을 직접 이용한다. 픽셀들을 다른 시점으로 reprojection 했을 때 픽셀 값의 차이를 계산하는 photometric error를 최소화하는 pose를 찾는다.
+- Indirect: 센서 입력에서 '중간 표현(intermediate representation)'을 만들어 사용하는 방법이다. 주로 keypoint와 descriptor의 조합으로 점들을 매칭해서 픽셀들을 다른 시점으로 reprojection 했을 때 영상 좌표의 geometric error를 최소화하는 pose를 찾는다.
 
-        // Check if we need to insert a new keyframe
-        if(NeedNewKeyFrame())
-            CreateNewKeyFrame();
-    }
-}
+**Dense vs Sparse**
 
-bool Tracking::TrackReferenceKeyFrame()
-{
-    // Compute Bag of Words vector
-    mCurrentFrame.ComputeBoW();
-    // ORB matching with the reference keyframe
-    int nmatches = matcher.SearchByBoW(mpReferenceKF,mCurrentFrame,vpMapPointMatches);
-    Optimizer::PoseOptimization(&mCurrentFrame);
-}
-```
+- Dense: 영상에서 대부분의 픽셀을 활용하는 방법인데 주로 Direct 방식과 결합된다. 영상 전체적인 optical flow를 쓰는 경우 Indirect Dense 방식이라고 볼 수 있다.
+- Sparse: 영상에서 특정 픽셀들만 쓰는 방법으로 주로 keypoint를 추출한다. ORB SLAM과 같은 Indirect Sparse 방식이 가장 널리쓰이는 방식이다. 
 
 
 
-### LocalMapping
+**Direct Sparse** 방식은 아직까지 거의 시도된적이 없는데 이 논문에서 최초로 시도하는 방식이다. 픽셀 값 차이를 최소화하는 Direct 방식인데 영상 전체의 픽셀을 사용하지 않고 영상을 샘플링해서 일부만 사용하여 Sparse하게 만든 것이다. 그래서 논문의 제목이 *Direct Sparse Odometry* 다. 
 
-`System` 생성자에서 `LocalMapping::Run()`을 위한 thread가 시작된다.
+Direct 방식은 카메라의 노출이나 감마 함수 등에 의한 phometric distortion과 rolling shutter에 의한 geometric distortion에 취약할 수 있다. 하지만 저자의 '주장'은 앞으로 컴퓨터 비전을 목적으로 완벽히 photometric calibarion 가능한 카메라들이 사용된다는 것이다.  
 
-```cpp
-void LocalMapping::Run()
-{
-    while(1)
-    {
-        // Tracking will see that Local Mapping is busy
-        SetAcceptKeyFrames(false);
-
-        // Check if there are keyframes in the queue
-        if(CheckNewKeyFrames())
-        {
-            // BoW conversion and insertion in Map
-            ProcessNewKeyFrame();
-            // Check recent MapPoints
-            MapPointCulling();
-            // Triangulate new MapPoints
-            CreateNewMapPoints();
-
-            if(!CheckNewKeyFrames())
-            {
-                // Find more matches in neighbor keyframes and fuse point duplications
-                SearchInNeighbors();
-            }
-            if(!CheckNewKeyFrames() && !stopRequested())
-            {
-                // Local BA
-                if(mpMap->KeyFramesInMap()>2)
-                    Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpMap);
-
-                // Check redundant local Keyframes
-                KeyFrameCulling();
-            }
-            mpLoopCloser->InsertKeyFrame(mpCurrentKeyFrame);
-        }
-    }
-}
-```
+이 논문의 Direct Sparse 방식으로 camera poses, camera intrinsics, geometry parameters (inverse depth)를 동시에 최적화한다. 이를 위해 photometric calibration을 최대한 활용한다. (photometric parameter: lens attenuation, gamma correction, exposure time)
 
 
 
-### LoopClosing
+## Direct Sparse Model
 
-`System` 생성자에서 `LoopClosing::Run()`을 위한 thread가 시작된다.
+### Calibration
 
-```cpp
-void LoopClosing::Run()
-{
-    mbFinished =false;
-    while(1)
-    {
-        // Check if there are keyframes in the queue
-        if(CheckNewKeyFrames())
-        {
-            // Detect loop candidates and check covisibility consistency
-            if(DetectLoop())
-            {
-               // Compute similarity transformation [sR|t]
-               // In the stereo/RGBD case s=1
-               if(ComputeSim3())
-               {
-                   // Perform loop fusion and pose graph optimization
-                   CorrectLoop();
-               }
-            }
-        }       
-    }
-}
-```
+Direct 방식은 calibration이 매우 중요한데 여기서는 두 가지 calibration을 적용한다. Geometric calibration을 통해 먼저 radial distortion을 제거한 뒤 다시 intrinsic parameter를 계산한다.  
+
+다음 단계로 lens attenuation이나 노출 시간 등에 의한 픽셀 값 변화를 보정하기 위해 photometric calibraiton을 한다. Photometric camera model은 다음과 같다.
+$$
+\begin{matrix}
+I_i(\mathbf{x}) = G(t_iV(\mathbf{x})B_i(\mathbf{x})) \\
+I'_i(\mathbf{x}) := t_i B_i(\mathbf{x}) = {G^{-1}(I_i(\mathbf{x})) \over V(\mathbf{x})}
+\end{matrix}
+$$
+
+- $$G()$$ : sensor response function
+- $$t_i$$ : exposure time
+- $$V(\mathbf{x})$$ : lens attenuation (vignetting)
+- $$I(\mathbf{x})$$ : observed pixel value
+- $$I'(\mathbf{x})$$ : calibrated pixel value
+
+DSO에서는 미리 photometric calibration이 되어있는 TUM monoVO 데이터셋에서 제공하는 calibration 파라미터나 함수를 써서 이미지를 먼저 보정한 $$I'(\mathbf{x})$$를 사용한다.  
+
+
+
+## Model Formulation
+
+Photometirc error는 샘플링한 픽셀에 대해서만 구하는 것이 아니라 주변 픽셀들까지 같이 계산한다. 아래 그림처럼 중심 픽셀과 주변 픽셀까지 8개의 픽셀에 대해 weighted SSD (sum of squared distance ??)를 계산한다. 
+
+![dso1](../assets/2019-07-17-savo-survey/dso1.png)
+
+8개 픽셀에 대한 SSD는 다음과 같이 구한다.
+
+![dso2](../assets/2019-07-17-savo-survey/dso2.png)
+
+![dso3](../assets/2019-07-17-savo-survey/dso3.png)
+
+![dso4](../assets/2019-07-17-savo-survey/dso4.png)
+
+- $$t_i$$ : exposure time
+- $$a_i, a_j, b_i, b_j$$ : parameters for affine brightness transfer function $$e^{-a_i} (I_i - b_i)$$
+- $$d_p$$ : depth of pixel p
+- $$\omega_p$$ : gradient dependent weighting, low weight for high gradient pixels
+
+
+
+여기서 중요한 점은 point를 inverse depth 하나로만 parameterization 한다는 것이다. keyframe에서 발견된 픽셀이 고정되면 방향이 정해지고 깊이만 추정하면 된다. 다른 모델에서 3차원 좌표를 추정한 것과는 다른 방식이다.
+
+이를 여러 프레임에 걸쳐 photometric error를 더하면 다음과 같다. 이 에러 함수를 최소화하는 camera poses ($$T_i$$), depths ($$d_p$$), intensity affine parameters ($$a_i, b_i$$) 를 찾으면 된다.
+
+![dso5](../assets/2019-07-17-savo-survey/dso5.png)
+
+DSO는 이러한 최적화를 sliding (time) window에 적용하여 현재 위치를 추적한다.
+
+
+
+## Visual Odometry Front-End
+
+Front-end란 최적화 외에 keyframe이나 keypoint 등을 관리하는 모듈이다. DSO는 언제나 7개의 keyframe을 (8)번 식으로 최적화한다.  
+
+Keyframe을 관리하는 방법은 다음과 같다.
+
+1. Initial Frame Tracking: 새로운 keyframe이 생기면 기존의 active point들을 모두 그곳에 projection한다. 새로운 프레임이 들어오면 최신 keyframe과의 관계만 계산한다. 
+2. Keyframe Creation: ORB SLAM 처럼 일단 최대한 많은 keyframe들을 생성한다. 조건은 다음과 같다.
+   1. 시야 변화: 마지막 keyframe으로부터 optical flow가 커질때
+   2. 가려짐 (Occlusion): rotation 없이 pixel을 warping 했을 때 픽셀 오차로 판단
+   3. 노출 시간이 급격히 변할 때
+3. Keyframe Marginalization: keyframe을 제거하는 과정이다.
+   1. 가장 최근 두 개의 keyframe은 남긴다.
+   2. 마지막 keyframe에서 특정 keyframe의 point가 5% 이상 보이지 않으면 제거한다.
+   3. 7개 이상의 keyframe이 생기면 그 중 마지막 keyframe과 가장 떨어진 keyframe을 제거한다.
+
+
+
+DSO는 항상 2000여개의 keypoint를 각 프레임 단위로도, 전체 최적화 윈도우 단위로도 유지한다. Keypoint를 관리하는 방법은 다음과 같다.
+
+1. Candidate Point Selection: 프레임 단위로 candidate point를 만드는 방법이다. 영역을 나눠서 gradient를 구한 뒤 gradient를 영역별로 정규화한다. 이후 다시 이미지 영역을 나눠서 영역별로 gradient가 높은 점들을 선택한다. 만약 threshold를 넘는 gradient 점들이 충분히 나오지 않으면 threshold를 낮춰서 반복한다.  
+2. Candidate Point Tracking: 점들을 다음 프레임에서 추적하는데 epipolar line을 따라 photometric error가 가장 낮은 점을 찾는다. 기존에 추정한 depth로 검색 범위를 좁힌다.
+3. Candidate Point Activation: 예전 점들이 지워지면 새로운 점들로 채우는데 이미지에 되도록 골고루 점들이 분포하게 하기 위해 기존 점들과 가장 거리가 먼 점들부터 채운다.
+4. Outlier and Occlusion Detection: 2에서 epipolar line을 따라 검색할 때 error가 너무 크면 그 점을 버린다. 주변 점들까지 고려한 photometric error가 너무 커도 버린다.
 
