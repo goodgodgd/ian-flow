@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "[WIP] Introduction to Open3D"
-date:   2010-07-25 09:00:01
-categories: research
+title:  "Introduction to Open3D"
+date:   2019-07-25 09:00:01
+categories: programming
 ---
 
 
@@ -18,21 +18,19 @@ Open3D는 3차원 데이터를 다루기 위한 도구들을 모은 라이브러
 - 3차원 데이터를 위한 다양한 알고리즘
   - Local/Global Registration (ICP 등)
   - Normal Estimation
-  - K-D Tree
+  - KD Tree
   - TSDF Volume Integration
   - Pose-graph Optimization
 
 이러한 기능은 원래 PCL(Point Cloud Library)에도 있었다. 하지만 Open3D는 이와 차별화되는 특징들이 있다. 
 
 - 3rd Party 라이브러리에 대한 의존성 최소화: 한마디로 **설치가 쉽다.** PCL을 한 번 빌드하려면 그 전에 최소 대여섯개의 3rd Party 라이브러리를 설치하던지 직접 소스에서 빌드를 하고 PCL과 링크를 시켜줘야 했다. (이 작업에만 하루가 걸린다.) 하지만 Open3D는 3rd Party 라이브러리 수도 적고 필요한 것들은 Open3D 저장소에 포함되어 있다. 그래서 3rd Party를 따로 받을 필요 없이 Open3D 내부에서 함께 빌드하면 된다.
-- 가벼움: 3rd Party 라이브러리가 적고 내부 구조를 단순하게 만들어서 라이브러리 설치 파일의 개수나 용량도 적다.
-- Python/C++ 지원: Open3D의 공식 문서는 Python 기반으로 설명하고 있다. 내부적으로는 C++로 구현하여 최적화 시켰지만 Python API를 만들어 Python에서 쓰기가 더 쉽다. [(Python Documentation)](http://www.open3d.org/docs/release/) C++ API도 당연히 있지만 이건 설명하는 문서가 없고 API reference와 다양한 예제 파일들을 보며 사용법을 익혀야 한다. [(C++ API reference)](http://www.open3d.org/docs/release/cpp_api/index.html), [(C++ examples)](https://github.com/intel-isl/Open3D/tree/master/examples/Cpp) 참고로 PCL도 Python API가 있다. [(링크)](https://github.com/strawlab/python-pcl)
+- 가벼움: 3rd Party 라이브러리가 적고 내부 구조를 단순하게 만들어서 라이브러리 설치 파일의 개수나 용량도 적다. ~~라이브러리 파일만 GB 단위가 되는 PCL과는 차원이 다르다.~~
+- Python/C++ 지원: [Open3D의 공식 문서](http://www.open3d.org/docs/release/)는 Python 기반으로 설명하고 있다. 내부적으로는 C++로 구현하여 최적화 시켰지만 Python API를 만들어 Python에서 쓰기가 더 쉽다. C++ API도 당연히 있지만 이건 설명하는 문서가 없고 [API reference](http://www.open3d.org/docs/release/cpp_api/index.html)와 다양한 [예제 파일들](https://github.com/intel-isl/Open3D/tree/master/examples/Cpp)을 보며 사용법을 익혀야 한다. 참고로 PCL도 Python API가 있다. [(링크)](https://github.com/strawlab/python-pcl)
 - C++사용의 편의성: PCL은 C++의 template 문법을 거의 모든 곳에 적용하여 최적화나 확장성은 좋지만 코딩을 하기에는 매우 불편한점이 많다. Open3D는 자주 쓰이는 타입 하나로만 한정하여 코드를 읽고 쓰기가 더 편하다.
 - Cross platform: Ubuntu/Windows/MacOS 에서 모두 작동한다. 
 
-2018년 2월에 최초 릴리즈된 신생 프로젝트이기 때문에 PCL에는 있지만 Open3D에는 없는 기능(segmentation 등)이 좀 있다. 하지만 같은 기능의 알고리즘도 더 최신 알고리즘이 들어갔고 Open3D에는 PCL에 없는 Graph Optimization이나 PointNet 등도 지원한다. 오픈 소스로서 앞으로 더 발전할 가능성이 높다.
-
-**여담**  
+2018년 2월에 최초 릴리즈된 신생 프로젝트이기 때문에 PCL에는 있지만 Open3D에는 없는 기능(segmentation 등)이 좀 있다. 하지만 같은 기능의 알고리즘도 더 최신 알고리즘이 들어갔고 Open3D에는 PCL에 없는 Graph Optimization이나 PointNet 등도 지원한다. 오픈 소스로서 앞으로 더 발전할 가능성이 높다.  
 
 Open3D 개발사는 인텔(Intel)인데 인텔에서 3차원 센서도 만들면서 관련 소프트웨어도 개발한 것 같다. 여러 사람이 개발했지만 압도적으로 많이 기여한 한 명이 있는데 박재식이라는 한국 사람이다. 카이스트 박사 후 인텔에서 일하다 최근 포스텍으로 갔다고 한다.
 
@@ -122,16 +120,16 @@ LIBS += -L<install path>/open3d/lib \
 
 예제에서 사용하는 주로 namespace는 다음과 같다. 이 namespace 안에 클래스와 함수의 이름들만 봐도 기능을 알 수 있다.
 
-- open3d::geometry : Image나 PointCloud 같은 자료형이 들어있다.
-- open3d::io : geometry 자료형을 파일로 읽고 쓰는 함수들이 있다.
-- open3d::visualization : DrawGeometries()처럼 시각화 관련 함수들이 있다.
-- open3d::registration : PointCloud 사이의 registration 함수들이 있다.
+- `open3d::geometry` : Image나 PointCloud 같은 (3차원) 데이터를 위한 자료형이 들어있다.
+- `open3d::io` : geometry 자료형을 파일로 읽고 쓰는 함수들이 있다.
+- `open3d::visualization` : geometry 자료형을 시각화하는 함수들이 있다.
+- `open3d::registration` : PointCloud 사이의 registration 함수들이 있다.
 
 
 
 ## 3.1 File IO and Visualization
 
-OpenCV에서 제공하지 않는 point cloud를 저장하는 `.pcd` 파일 형식이나 mesh를 저장하는 `.ply` 형식을 읽어주는 것만으로도 Open3D는 써볼 가치가 있다.  
+Point cloud를 저장하는 `.pcd` 파일 형식이나 mesh를 저장하는 `.ply` 형식을 읽고 보여주는 것만으로도 Open3D는 써볼 가치가 있다.  
 
 아래 링크들은 이와 관련된 Python 튜토리얼이다. Python 튜토리얼을 보면 관련 내용에 대한 설명이 있고 C++에도 비슷한 클래스와 함수들이 있기 때문에 도움이 된다.  
 
@@ -227,7 +225,7 @@ Depth 영상을 화면에 보여주기 위해서는 FloatImage로 변형해주�
 ```cpp
     // show depth
     open3d::visualization::DrawGeometries({depth_float}, "Depth", 
-								depth_ptr->width_, depth_ptr->height_);
+			depth_ptr->width_, depth_ptr->height_);
 ```
 
 
@@ -473,7 +471,7 @@ GUI에서 "ICP point-to-plane"를 클릭하면 다음 함수가 실행된다.
 
 ```cpp
 void RegistrationExamples::IcpPointCloud(const char* srcdepthfile, 
-										 const char* tgtdepthfile)
+                                         const char* tgtdepthfile)
 {
 	// read
     o3ImagePtr src_depth = open3d::io::CreateImageFromFile(srcdepthfile);
@@ -507,11 +505,9 @@ void RegistrationExamples::IcpPointCloud(const char* srcdepthfile,
         RegPar::init_pose, "point to plane ICP");
 ```
 
-변환 후 `Crop()` 함수로 범위를 point cloud의 범위를 자르는데 이유는 뒤쪽으로 길에 늘어진 point cloud가 정합에 도움이 되지 않기 때문이다.  
-
 이후 `ShowTwoPointClouds()`로 두 개의 point cloud를 화면의 띄워 비교한다. color 정보가 없으면 정해진 색을 칠해버린다. (`PaintUniformColor()`) 원본 데이터를 그대로 보존하기 위해서는 PointCloud 데이터를 deep copy 해야 하는데 현재로서는 그런 기능이 없다. 그래서 원본의 복사본을 만들기 위해 넓은 범위를 주고 crop을 했다.  
 
-`source`의 좌표들을 `transform` 입력인자로 좌표계 변환 후 화면에 표시한다. 지금은 identity matrix를 입력했기 때문에 정합되지 않은 두 개의 point cloud가 보인다.
+`ShowTwoPointClouds()` 함수는 `source`의 좌표들을 `transform` 입력인자로 좌표계 변환 후 화면에 표시한다. 지금은 identity matrix를 입력했기 때문에 정합되지 않은 두 개의 point cloud가 보인다.
 
 ```cpp
 void RegistrationExamples::ShowTwoPointClouds(o3PointCloudPtr source, 
