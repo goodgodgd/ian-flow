@@ -33,6 +33,7 @@ gcc를 직접 쓰기 불편해서 make가 생겼는데 프로젝트가 복잡해
 소스 코드는 다음과 같다.
 
 ```cpp
+// 터미널에서 실행: gedit main.cpp foo.h foo.cpp bar.h bar.cpp
 // bar.h
 #ifndef BAR_H
 #define BAR_H
@@ -44,7 +45,7 @@ void bar();
 // bar.cpp
 #include "bar.h"
 void bar() {
-	std::cout << "hello bar\n";
+    std::cout << "hello bar\n";
 }
 // foo.h
 #ifndef FOO_H
@@ -57,7 +58,7 @@ void foo();
 // foo.cpp
 #include "foo.h"
 void foo() {
-	std::cout << "hello foo\n";
+    std::cout << "hello foo\n";
 }
 // main.cpp
 #include <iostream>
@@ -65,9 +66,9 @@ void foo() {
 #include "bar.h"
 int main()
 {
-	std::cout << "Hello main\n";
-	foo();
-	bar();
+    std::cout << "Hello main\n";
+    foo();
+    bar();
     return 0;
 }
 ```
@@ -124,7 +125,7 @@ $ ./myapp
 $ rm *.o *.out
 $ gedit CMakeLists.txt
 # CMakeLists.txt 작성
-ADD_EXCUTABLE(myapp main.cpp foo.cpp bar.cpp)
+ADD_EXECUTABLE(myapp main.cpp foo.cpp bar.cpp)
 # 닫기
 $ mkdir build
 $ cd build
@@ -160,13 +161,12 @@ cmake의 주요 명령어를 하나씩 알아보면서 `CMakeLists.txt`를 작�
 cmake에는 자동으로 지정된 변수들이 많은데 이들을 잘 알아야 원하는 빌드 설정을 하고 `CMakeLists.txt`도 쉽게 작성할 수 있다. 대부분 `CMAKE_`로 시작하며 `CMakeCache.txt`를 보면 어떤 변수들이 있는지 볼 수 있다. 그 중 중요한 몇 개만 여기에 설명하는데 아래 내용을 보다가 이 변수들이 나오면 의미를 찾아보자.
 
 - `CMAKE_CURRENT_SOURCE_DIR`: 소스 파일들을 찾을 디렉토리 경로로 `CMakeLists.txt`가 있는 경로가 기본 값으로 들어있다. 다른 경로를 설정할 때 이 변수를 기준으로 상대 경로를 만들면 편하다.
-- `CMAKE_INSTALL_PREFIX`: `make install` 할때 빌드 결과물이 복사될 경로로 `/usr/local`이 기본 값이다.
+- `CMAKE_INSTALL_PREFIX`: `make install` 할때 빌드 결과물이 복사될 경로로 `/usr/local`이 기본 값이다. 자세한 설명은 `install()` 함수 내용을 참조한다.
 - `CMAKE_PREFIX_PATH`: `find_package()` 등의 명령에서 외부 프로젝트를 검색할 경로다. 어떤 프로젝트에서 다른 프로젝트의 라이브러리를 사용하고자 할 때 이 변수의 경로에서 하위 디렉토리까지 전부 검색한다.
 - `CMAKE_PROJECT_NAME `: `project()`라는 명령어에서 설정할 수 있는 프로젝트의 이름이다.
 - `CMAKE_BUILD_TYPE`: 빌드 형상을 지정할 수 있는 변수인데 빌드 형상은 대표적으로 `Debug`와 `Release`가 있다.
 - `CMAKE_CXX_COMPILER`: c++컴파일러를 지정할 수 있다. `g++`이 기본이지만 다른 컴파일러나 `g++`의 다른 버전을 선택할 수 있다.
 - `CMAKE_CXX_FLAGS`: c++ 컴파일 옵션을 지정한다.
-- `CMAKE_INSTALL_PREFIX`: `make install`로 빌드 결과물을 설치할 base 경로를 설치한다. 자세한 설명은 `install()` 함수 내용을 참조한다.
 
 
 
