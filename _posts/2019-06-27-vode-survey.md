@@ -92,7 +92,7 @@ categories: research
 
 ## 특징
 
-Depth를 직접 예측하는 것이 아니라 disparity를 출력한다. Visual odometry는 하지 않는다. 왼쪽 이미지($$I^l$$)로부터 두 개의 disparity map을 만든다. (**left-to-right disparity ($$d^r$$), right-to-left disparity ($$d^l$$)** )  
+스테레오 데이터셋을 이용하여 상대 pose는 고정된 상태에서 depth만 학습한다. Depth를 직접 예측하는 것이 아니라 disparity를 출력한다. Visual odometry는 하지 않는다. 왼쪽 이미지($$I^l$$)로부터 두 개의 disparity map을 만든다. (**left-to-right disparity ($$d^r$$), right-to-left disparity ($$d^l$$)** )  
 
 ![LR-consistency1](../assets/2019-06-27-vode-survey/LR-consistency1.png)
 

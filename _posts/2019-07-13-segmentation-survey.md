@@ -112,11 +112,9 @@ Encoder에서 max pooling으로 feature map의 해상도를 줄이는 이유는
 이것은 원래 영상 분류 작업에 적합한 구조고 segmentation에서는 픽셀 단위의 세부 정보를 잃어버리는 것이므로 segmentation의 정확도가 떨어지는 원인이 된다. 그래서 *DeepLab*에서는 max pooling을 줄이고 feature map의 크기를 늘리는 대신 수용 영역(receptive field)를 늘리기 위해 **atrous convolution**을 제안한다. 다른 논문에는 dilated convolution 이라는 용어로도 쓰인다.
 
 | <img src="../assets/2019-07-13-segmentation-survey/same_padding_no_strides.gif" alt="normal conv" width="300"/> |
-| ===== |
 | 일반적인 convolution, [출처](<https://github.com/vdumoulin/conv_arithmetic>) |
 
 | <img src="../assets/2019-07-13-segmentation-survey/dilated_conv.gif" alt="dilated conv" width="300"/> |
-| ===== |
 | Atrous convolution, [출처](<https://github.com/vdumoulin/conv_arithmetic>)|
 
 
