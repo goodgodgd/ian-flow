@@ -17,7 +17,8 @@ Reference: An Invitation to 3-D vision, Chapter 2.
 | vector form | $ w \in \mathbb{R}^3 $ | $ \xi = \begin{bmatrix} w & v \end{bmatrix}^T \in \mathbb{R}^6 $<br>: twist coordinates |
 | exponential coordinates | $ \hat{w} \in so(3) \subset \mathbb{R}^{3 \times 3} $  $$ \widehat{w} \doteq  \begin{bmatrix} 0 & -w_3 & w_2 \\ w_3 & 0 & -w_1 \\ -w_2 & w_1 & 0 \end{bmatrix} $$ | $ \hat{\xi} \in se(3) \subset \mathbb{R}^{4 \times 4} $: twist  $$ \widehat{\xi} \doteq \begin{bmatrix} \widehat{w} & v \\ 0 & 0 \end{bmatrix} $$ |
 | matrix form | $ R = e^{\hat{w}} \in SO(3) \subset \mathbb{R}^{3 \times 3} $ | $ T = e^{\hat{\xi}} \in SE(3) \subset \mathbb{R}^{4 \times 4} $ |
-| exponential map | $$ e^{\widehat{w}} = I + {\widehat{w} \over \begin{Vmatrix} w \end{Vmatrix}} sin(\begin{Vmatrix} w \end{Vmatrix}) $$ $$ + {\widehat{w}^2 \over \begin{Vmatrix} w \end{Vmatrix}^2} (1 - cos(\begin{Vmatrix} w \end{Vmatrix}) $$ | $$ e^{\widehat{\xi}t}  = \begin{bmatrix} e^{\widehat{w}} & \left( I - e^{\widehat{w}} \right) \widehat{w} v + w \widehat{w}^T v \\ 0 & 1 \end{bmatrix} $$ |
+| exponential map | $$e^{\widehat{w}t} = I + \widehat{w}sin(t) + \widehat{w} ^2 (1-cos(t))$$ where $$ \begin{Vmatrix} w \end{Vmatrix}=1 $$ | $$ e^{\widehat{\xi}t}  = \begin{bmatrix} e^{\widehat{w}} & \left( I - e^{\widehat{w}} \right) \widehat{w} v + w \widehat{w}^T v \\ 0 & 1 \end{bmatrix} $$ |
+
 
 
 ## 2.1 Three-dimensional Euclidean space
@@ -110,13 +111,13 @@ When a camera moves, the camera frame also moves along with the camera. The conf
 1. Translational part $ T $ : the vector between the origin of the world frame and that of the camera frame.
 2. Rotational part $ R $ : the relative orientation of the camera frame $ C $, with coordinate axes $ (x,y,z) $, relative to the fixed world frame $ W $ with coordinate axes $ (X,Y,Z) $
 
-![camera frame](/ian-flow/assets/2019-01-03-rigid-body-motion/camera_frame.png)
+![camera frame](../assets/2019-01-03-rigid-body-motion/camera_frame.png)
 
 ## 2.3 Rotational motion and its representations
 
 ### 2.3.1 Orthogonal matrix representation of rotations
 
-![rotation of a rigid body](/ian-flow/assets/2019-01-03-rigid-body-motion/rotation_rigid_body.png)
+![rotation of a rigid body](../assets/2019-01-03-rigid-body-motion/rotation_rigid_body.png)
 
 The frame  C  relative to the frame  W  is determined by the three orthonormal vectors: 
 
