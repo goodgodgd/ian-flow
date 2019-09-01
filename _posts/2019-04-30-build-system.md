@@ -259,19 +259,21 @@ add_executable(myapp ${SOURCE_FILES})
 
 ```cpp
 // myqt5.h
-#ifndef FOO_H
-#define FOO_H
+#ifndef MYQT5_H
+#define MYQT5_H
 
 #include <QtCore/QtCore>
 void myqt_func(const char* str);
 
-#endif // FOO_H
+#endif // MYQT5_H
+
 // myqt5.cpp
 #include "myqt5.h"
 void myqt_func(const char* str) {
 	QString qstr = str;
 	qDebug() << "myqt5" << qstr;
 }
+
 // main.cpp
 #include <iostream>
 #include "myqt5.h"
@@ -333,7 +335,7 @@ add_compile_options(-Wall -std=c++14 -O2 -fPIC)
 
 외부 라이브러인를 사용하기 위해 라이브러리를 검색해주는 함수다. 어떤 프로젝트를 하던 그에 맞는 외부 라이브러리를 써야하므로 중요한 함수다. `<package-name>Config.cmake`형식의 이름을 가진 파일을 찾고 그 파일을 cmake로 실행한다. `REQUIRED` 옵션은 빌드에 필수적인 패키지란 뜻이다. `REQUIRED`가 붙었는데 찾지 못하면 에러가 난다. `Makefile`을 만들기 전 의존하는 패키지가 있는지 확인하는 용도로도 많이 쓰인다.  
 
-패키지를 자동으로 찾지 못 한다면 사용자가 경로를 직접 지정해줘야 한다. find_package(<package_name> PATH <path_to_package>)` 형식으로 검색할 경로를 지정할 수도 있고 그 전에 `CMAKE_PREFIX_PATH`에 경로를 추가해도 된다.
+패키지를 자동으로 찾지 못 한다면 사용자가 경로를 직접 지정해줘야 한다. `find_package(<package_name> PATH <path_to_package>)` 형식으로 검색할 경로를 지정할 수도 있고 그 전에 `CMAKE_PREFIX_PATH`에 경로를 추가해도 된다.
 
 `find_package()`를 실행하면 설정 파일의 디렉토리 경로를 `<package-name>_DIR`이란 변수에 저장하고 설정 파일의 full path를 `<package-name>_CONFIG`이란 변수에 저장한다. 다음은 `Qt5Core` 라이브러리를 찾으면서 생긴 변수들을 출력하는 함수다. 
 
