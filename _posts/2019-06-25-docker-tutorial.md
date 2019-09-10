@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Docker Tutorial"
+title:  "Docker with GUI Tutorial (Sep. 2019 Update)"
 date:   2019-06-25 09:00:01
 categories: tools
 
@@ -67,11 +67,12 @@ categories: tools
 내가 설치한 Ubuntu 18.04 기준으로 요약하면 다음과 같다.
 ```bash
 # remove old versions
-$ sudo apt-get remove docker docker-engine docker.io
+$ sudo apt remove docker*
+$ sudo apt autoremove
 
 # install required pakages
-$ sudo apt-get update
-$ sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+$ sudo apt update
+$ sudo apt install apt-transport-https ca-certificates curl software-properties-common
 
 # add docker's official GPG key
 $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -83,9 +84,10 @@ uid                  Docker Release (CE deb) <docker@docker.com>
 sub   4096R/F273FCD8 2017-02-22
 
 # add repository
-$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-$ sudo apt-get update
-$ sudo apt-get install docker-ce
+$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+		$(lsb_release -cs) stable"
+$ sudo apt update
+$ sudo apt install docker-ce
 ```
 
 
@@ -93,7 +95,7 @@ $ sudo apt-get install docker-ce
 ## Docker 사용법
 
 ### 사용자 등록
-Docker의 설치 파일이나 이미지, 컨테이너 등이 시스템에서 실제 위치하는 곳은 시스템 경로인 `/var/lib/docker`이다. 그래서 docker 명령어는 `sudo`로 실행해야 한다. 하지만 docker 사용자 그룹에 현재 사용자를 추가하면 `sudo`를 생략해도 된다. Docker 설치 후에는 아래 커맨드를 실행하자.
+Docker의 설치 파일이나 이미지, 컨테이너 등이 시스템에서 실제 위치하는 곳은 시스템 경로인 `/var/lib/docker`이다. 그래서 docker 명령어는 `sudo`로 실행해야 한다. 하지만 docker 사용자 그룹에 현재 사용자를 추가하면 `sudo`를 생략해도 된다. Docker 설치 후에는 아래 커맨드를 실행하자. 그리고 **로그아웃이나 시스템 재시작**을 해야 효과가 나타난다.
 ```bash
 # use docker without sudo
 sudo usermod -aG docker $USER
@@ -101,7 +103,7 @@ sudo usermod -aG docker $USER
 
 ### Base Image 받기
 
-일단 Docker Hub에서 base image를 받아보자. `ubuntu:14.04`에서 `ubuntu`는 이미지 이름이고 `14.04`는 tag다. tag를 붙이지 않으면 기본 tag인 `latest`가 자동으로 붙어서 최신 우분투 버전이 설치되므로 꼭 정확한 tag를 붙여줘야 한다.
+일단 Docker Hub에서 base image를 받아보자. 예를 들어 Ubuntu 14.04 LTS 이미지를 받고 싶다면 `ubuntu:14.04`를 내려받으면 된다. `ubuntu`는 이미지 이름이고 `14.04`는 tag다. tag를 붙이지 않으면 기본 tag인 `latest`가 자동으로 붙어서 최신 버전이 설치되므로 꼭 정확한 tag를 붙여줘야 한다.
 ``` bash
 # pull base image
 docker pull ubuntu:14.04
@@ -216,7 +218,7 @@ $ docker container prune -f
 
 ### 유의사항 (ROS)
 
-컨테이너 안에서 ROS Indigo를 설치하는데 ROS 서버가 뭔가 작업중인지 자꾸 `apt update`를 할 때마다 `Hash sum mismatch`라는 에러가 난다. 오래된 버전이라 관리를 제대로 안해주는건지... 구글에 "Hash sum mismatch"라고 치면 주로 `rm -rf /var/lib/apt/lists/*` 라든가 `apt-get clean` 명령어를 쳐보라고 하는데 효과가 없었다. 시스템 내부 문제면 저걸로 해결이 되겠지만 서버자체에 문제가 있으면 해결이 되기를 기다리는 수밖에 없다. 며칠 지나면 문제 없다가 다시 생기기도 하고... 암튼 저걸로 시간을 많이 버렸는데 저 에러가 나면 너무 애쓰지 말고 기다려보길 바란다.
+컨테이너 안에서 ROS Indigo를 설치하는데 ROS 서버가 뭔가 작업중인지 자꾸 `apt update`를 할 때마다 `Hash sum mismatch`라는 에러가 난다. 오래된 버전이라 관리를 제대로 안해주는건지... 구글에 "Hash sum mismatch"라고 치면 주로 `rm -rf /var/lib/apt/lists/*` 라든가 `apt clean` 명령어를 쳐보라고 하는데 효과가 없었다. 시스템 내부 문제면 저걸로 해결이 되겠지만 서버자체에 문제가 있으면 해결이 되기를 기다리는 수밖에 없다. 며칠 지나면 문제 없다가 다시 생기기도 하고... 암튼 저걸로 시간을 많이 버렸는데 저 에러가 나면 너무 애쓰지 말고 기다려보길 바란다.
 
 
 
@@ -230,7 +232,7 @@ $ docker container prune -f
 
 ### A. xhost를 이용한 X server 연결
 
-다음은 ubuntu:18.04 이미지로부터 GUI가 가능한 `test-gui`라는 컨테이너를 실행하는 커맨드다. 두 커맨드의 순서는 상관없다. `docker run`을 실행하면 컨테이너 내부로 들어가므로 `xhost`를 미리 실행하던가 아니면 `docker run` 이후에 다른 터미널을 열어 `xhost`를 실행해도 된다.
+다음은 `ubuntu:18.04` 이미지로부터 GUI가 가능한 `test-gui`라는 컨테이너를 실행하는 커맨드다. 두 커맨드의 순서는 상관없다. `docker run`을 실행하면 컨테이너 내부로 들어가므로 `xhost`를 미리 실행하던가 아니면 `docker run` 이후에 다른 터미널을 열어 `xhost`를 실행해도 된다.
 
 ```bash
 $ xhost +local:
@@ -253,7 +255,7 @@ xhost의 활용법은 이 블로그에 잘 나와있다. <http://egloos.zum.com/
 
 블로그마다 `+local:` 뒤에 root를 붙이라는데도 있고 docker를 붙이라는데도 있는데 원리는 모르지만 내가 실험해보니 `+local:`처럼 아무것도 안써도 되고 뒤에 아무거나 붙여도 상관없이 GUI는 작동한다. `xhost +family:name` 형식으로 지정하는 것인데 family만 local로 지정하면 된다.
 
-두 번째 `docker run~~` 커맨드는 호스트의 `DISPLAY` 환경변수를 컨테이너로 전달하고 호스트의 X11 unix socket을 컨테이너에 마운트한다. ~~무슨 말인지 나도 절반만 이해했다.~~
+두 번째 `docker run~~` 커맨드는 호스트의 `DISPLAY` 환경변수를 컨테이너로 전달하고 호스트의 X11 unix socket을 컨테이너에 마운트한다. ~~무슨 말인지 나도 모르겠다.~~
 
 GUI가 되는지 확인하기 위해 컨테이너에서 파일 탐색기인 nautilus를 설치하고 실행해보자.
 
@@ -288,39 +290,62 @@ X Error of failed request:  BadValue (integer parameter out of range for operati
 
 
 
-컨테이너에서 GPU에 접근하기 위해서는 이를 위한 전용 도커 설치가 필요하다. 아직까지 내가 알기로는 NVidia GPU만 이를 지원하고 NVidia GPU가 설치된 PC에서는 `nvidia-docker2`를 설치하면 된다. 설치과정은 다음 링크를 참조한다.
+#### Update!! (2019.09)
 
-<https://github.com/NVIDIA/nvidia-docker/wiki/Installation-(version-2.0)>
+도커 컨테이너에서 GPU 자원에 접근하려면 얼마 전까지는 `nvidia-docker2`를 설치했어야 하는데 이제는 도커 자체에서 NVIDIA GPU에 접근을 할 수 있게 됐다. (아마 8월에 업데이트가 된것 같다.) 도커 버전이 19.03 이상이라면 가능하다. 설치법은 아래 링크에 자세히 설명돼있다.
 
-설치 전에 NVidia 드라이버 버전을 확인한다. (~=361.93) `nvidia-docker`는 기본 `docker`에 GPU 활용기능만 추가한 thin wrapper라고 보면 된다. 사용방법도 기본 도커와 동일하다. 
+<https://github.com/NVIDIA/nvidia-docker/wiki/Installation-(Native-GPU-Support)>
 
+그런데 혹시라도 NVIDIA driver가 설치가 안돼있다면 드라이버부터 최신 버전으로 설치한다.
+
+```bash
+sudo apt-add-repository ppa:graphics-drivers/ppa
+sudo apt remove nvidia*
+sudo apt autoremove
+sudo ubuntu-drivers autoinstall
 ```
-$ sudo apt-get install nvidia-docker2
-$ sudo pkill -SIGHUP dockerd
+
+도커만 설치한다고 되는건 아니고 `nvidia-container-toolkit`을 설치해줘야 한다.
+
+```bash
+# Add the package repositories
+$ distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+$ curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+$ curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+
+$ sudo apt update && sudo apt install -y nvidia-container-toolkit
+$ sudo systemctl restart docker
 ```
 
+과거엔 GPU를 쓰기 위해선 `docker` 대신  `nvidia-docker`를 썼어야 했는데 이제는 `docker run --gpus ~~`처럼 기본 도커의 옵션으로 들어간다.
 
 
-`nvidia-docker` 설치로 끝나는 것은 아니고 도커에서 opengl을 쓸수 있게 설정해놓은 도커 이미지가 있어야 한다. 일반 이미지에서도 `Dockerfile` 을 잘 만들면 가능한 것 같지만 ([링크](https://github.com/NVIDIA/nvidia-docker/issues/136)) 그냥 우분투 이미지를 쓸거라면 NVidia에서 제공한 `nvidia/opengl` 이미지를 사용하는 것이 편하다. OpenGL외에 CUDA까지 쓸거라면 `nvidia/cuda` 이미지를 써야한다. 이미지 태그는 여기서 확인할 수 있다.
+
+#### NVIDIA 도커 이미지
+
+모든 도커 이미지에서 GPU를 쓸 수 있는건 아니고 GPU를 쓸 수 있게 설정해놓은 전용 도커 이미지가 있어야 한다. 일반 이미지에서도 `Dockerfile` 을 잘 만들면 가능한 것 같긴하다. ([링크](https://github.com/NVIDIA/nvidia-docker/issues/136)) 그냥 우분투 이미지로 OpenGL을 쓸거라면 NVIDIA에서 제공한 `nvidia/opengl` 이미지를 사용하는 것이 편하다. CUDA를 쓸거라면 `nvidia/cuda` 이미지를 써야한다. 이미지 태그는 여기서 확인할 수 있다.
 
 <https://hub.docker.com/r/nvidia/opengl>
 
 <https://hub.docker.com/r/nvidia/cuda>
 
-Ubuntu 18.04를 기반으로 OpenGL이 가능한 이미지는 `nvidia/opengl:1.0-glvnd-devel-ubuntu18.04` 이다. 다음 명령어로 내려 받을 수 있다.
+<https://hub.docker.com/r/nvidia/cudagl>
+
+Ubuntu 18.04를 기반으로 OpenGL이 가능한 이미지는 `nvidia/opengl:1.1-glvnd-devel-ubuntu18.04` 이다. 다음 명령어로 내려 받을 수 있다.
 
 ```
-$ docker pull nvidia/opengl:1.0-glvnd-devel-ubuntu18.04
+$ docker pull nvidia/opengl:1.1-glvnd-devel-ubuntu18.04
 ```
 
-이제 컨테이너를 만들어 실행해보자. `docker` 대신 `nvidia-docker`를 쓰고 이미지도 `nvidia/opengl` 이미지를 사용한다. 이때도 GUI를 쓰기 위해서는 `xhost` 명령어를 미리 써야 하는데 로그인 후 한 번만 실행하면 된다.
+이제 컨테이너를 만들어 실행해보자.  `nvidia/opengl` 이미지에 `--gpus` 옵션만 추가하면 된다. 사용한다. 이때도 GUI를 쓰기 위해서는 `xhost +local:` 명령어를 미리 써야 하는데 로그인 후 한 번만 실행하면 된다.
 
 ```bash
-$ nvidia-docker run -it \
+# xhost +local:
+$ docker run --gpus all -it \
 	--name test-gl-gui \
 	--env="DISPLAY" \
 	--volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
-	nvidia/opengl:1.0-glvnd-devel-ubuntu18.04 bash
+	nvidia/opengl:1.1-glvnd-devel-ubuntu18.04 bash
 ```
 
 컨테이너에서 nautilus와 mesa-utils를 설치하고 실행해보자.
@@ -334,6 +359,9 @@ root@572be97f593a:/# glxgears
 
 당연히 nautilus는 실행될 것이고 지금까지 잘 따라왔다면 glxgears를 실행했을 때 빨녹파의 화사한 톱니바퀴가 돌아가는 것이 보일것이다.
 
+---
 
 
-지금까지 내가 공부한 도커의 사용법을 정리해보았다. 도커를 익숙하게 쓰기까지 (자세히는 아직 잘 모르지만) 2주 정도의 고통스런 시간이 필요했다. 도커에서 소스를 빌드했는데 GUI가 안떠서 에러가 나고 GUI 쓰는 법을 겨우 알아냈더니 OpenGL에서 에러가 나고... 어쨌든 이런저런 문제들을 해결하고 나니 호스트 시스템을 더럽히지 않으면서 깔고 싶은 것을 마음껏 깔아보고 맘에 안들면 지워버릴 수 있게 되어 잘 쓰고 있다.
+
+지금까지 내가 공부한 도커의 사용법을 정리해보았다. 도커를 익숙하게 쓰기까지 (자세히는 아직 잘 모르지만) 2주 정도의 힘든 시간이 필요했다. 도커에서 소스를 빌드했는데 GUI가 안떠서 에러가 나고 GUI 쓰는 법을 겨우 알아냈더니 OpenGL에서 에러가 나고... 어쨌든 이런저런 문제들을 해결하고 나니 호스트 시스템을 더럽히지 않으면서 깔고 싶은 것을 마음껏 깔아보고 맘에 안들면 지워버릴 수 있게 되어 잘 쓰고 있다. **도커 만세!**
+
