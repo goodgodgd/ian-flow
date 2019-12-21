@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "vscode setup for C++"
-date:   2010-08-22 09:00:01
+date:   2019-12-21 09:00:01
 categories: research
 ---
 
@@ -588,7 +588,8 @@ CMake 변수들은 `"cmake.configureSettings"` 아래서 지정할 수 있다. �
         {
             "type": "shell",
             "label": "execute",
-            "command": "cd ${workspaceFolder}/build && ./${fileBasenameNoExtension}",
+            // 어차피 hello라는 실행 파일이 나올 것이므로 실행파일 직접 지정
+            "command": "cd ${workspaceFolder}/build && ./hello",
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -630,17 +631,11 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 - Dockerfile 작성방법2: <https://docs.docker.com/engine/reference/builder>
 - docker-compose.yaml 작성방법: <https://docs.docker.com/compose/compose-file/#compose-file-structure-and-examples>
 
-
+도커는 주로 웹 개발하는 분들이 많이 쓰는데 나 같은 경우에는 C++ 프로젝트를 개발할 때 필요한 여러가지 라이브러리를 시스템에 직접 설치하는 것이 부담스러워서 도커를 사용한다. C++ 프로젝트는 만들때마다 dependency 버전이 다르기 때문에 예전에 만들었던 프로젝트를 현재 환경에서 다시 실행하는 것이 어렵다. 그래서 1) 시스템 패키지를 깨끗하게 유지하고 2) 나중에 재현 가능한 환경을 만들기 위해 도커를 사용한다.
 
 ### 4.1 도커 컨테이너 실행
 
-도커 컨테이너에 접속해서 작업을 하려면 일단 도커 컨테이너를 만들어야 하고 컨테이너에 맞는 이미지가 없으면 이미지부터 빌드해야 한다. 기존에 만들었던 **code_cmake** 프로젝트 안에서 docker 라는 폴더를 만들고 그 안에 Dockerfile 과 docker-compose.yaml 이라는 파일을 작성한다.
-
-```
-$ mkdir docker
-$ cd docker
-$ gedit Dockerfile docker-compose.yaml
-```
+도커 컨테이너에 접속해서 작업을 하려면 일단 도커 컨테이너를 만들어야 하고 컨테이너에 맞는 이미지가 없으면 이미지부터 빌드해야 한다. 기존에 만들었던 **code_cmake** 프로젝트 안에서 Dockerfile 이라는 파일을 작성한다.  
 
 **Dockerfile**은 도커 이미지를 빌드하기 위해 필요한 파일이다. 어떤 이미지를 기반으로 해서 어떤 설정이나 패키지 설치를 추가하여 새로운 이미지를 만드는 것이다. 아래 예시는 `ubuntu:18.04` 이미지를 기반으로 기본적인 빌드 툴들을 설치한 이미지를 만들도로록 Dockerfile을 작성한 것이다.
 
@@ -674,71 +669,59 @@ ubuntu-dev   1.0   8c0c3065d72b   19 minutes ago   512MB
 `ubuntu-dev:1.0` 이미지로부터 `ubuntu-remote`라는 컨테이너를 만들고 컨테이너의 쉘에 접속하는 명령어는 다음과 같다. `docker run`은 Dockerfile이 위치한 곳에서 실행해야 한다.
 
 ```bash
-$ docker run --name ubuntu-remote -it -v ${PWD}/../:/work ubuntu-dev:1.0 bash
+$ docker run --name ubuntu-remote -it -v ${PWD}:/work ubuntu-dev:1.0 bash
 # 도커 내부 쉘에 접속됨
 root@ca07e7e558ef:/# cd work/
 root@ca07e7e558ef:/work# ls
-CMakeLists.txt  build  docker  src
+CMakeLists.txt  Dockerfile  build  src
 root@ca07e7e558ef:/work# exit
 ```
+
+- `docker run` : 새로운 컨테이너를 만들면서 주어진 명령을 실행하는 명령어다.
+- `--name ubuntu-remote` : 컨테이너의 이름을 지정한다.
+- `-it` : interative terminal을 열수 있는 옵션이다.
+- `-v (--volume) ${PWD}:/work` : 현재 디렉토리를 컨테이너 내부의 /work 디렉토리와 공유한다. 호스트와 컨테이너 사이의 공용 디렉토리를 만드는 것이다.
+- `ubuntu-dev:1.0` : 컨테이너를 만들 이미지를 지정한다.
+- `bash` : 컨테이너를 만든 후 bash 쉘을 실행한다.
 
 종료된 컨테이너를 다시 시작하고 도커 내부 쉘에 접근하는 명령어는 다음과 같다.
 
 ```bash
 $ docker start ubuntu-remote 
 ubuntu-remote
-$ docker exec -it ubuntu-remote bash
+$ docker exec -it ubuntu-remote bash 
+root@ae8c95956ee6:/# exit
+$ docker ps -a
+CONTAINER ID  IMAGE           COMMAND  CREATED        STATUS           PORTS  NAMES
+ae8c95956ee6  ubuntu-dev:1.0  "bash"   2 minutes ago  Up About a minute       ubuntu-remote
+...
 ```
 
-
-
-여기서는 컨테이너를 하나만 사용할 것이기
-
-```yaml
-version: '3'
-
-services:
-    ubuntu-remote:
-        build: .
-        image: ubuntu-dev:1.0
-        container_name: ubuntu-remote
-        volumes:
-            - ${PWD}/../:/work
-        environment:
-            - USER_NAME=ian
-```
+`docker ps -a`를 했을 때 `STATUS`가 `Up`으로 나와야 컨테이터가 실행중인 것이고 그래야 vscode에서 접속할 수 있다.  `Exited` 상태라면 `docker start ubuntu-remote` 명령어로 컨테이너를 활성화한다.
 
 
 
-```
-docker-compose up
-```
+### 4.2 vscode에서 컨테이너 내부 접근
 
+vscode에서 컨테이너에 접근하기 위해서는 **Remote Development** 확장이 필요하다.
 
+![remote-devel](../assets/2019-12-21-vscode-tutorial/remote-devel.png)
 
+설치하면 왼쪽에 Remote Explorer 패널이 생긴다. [Command Palette] (`Ctrl+Shift+P`) - [Remote-Containers: Attatch to Running Container...] 를 선택하면 현재 활성화된 컨테이너 목록이 뜨고 이 중에 [ubuntu-remote]를 선택하면 된다.
 
+새 창이 뜨면 컨테이너 내부에서 /work 디렉토리를 연다. 그곳의 파일들은 호스트의 **code_cmake** 프로젝트 파일과 동일하지만 이제는 컨테이너에서 그 파일들을 접근하고 있는 것이다. 왼쪽의 Remote Explorer 패널을 보면 다음과 같이 나올 것이다.
 
+![remote-panel](../assets/2019-12-21-vscode-tutorial/remote-panel.png)
 
+각 컨테이너를 우클릭하면 `Start container`나 `Stop container` 메뉴가 떠서 UI로 컨테이너를 실행하고 끄는 것도 가능하다. 호스트에서 했던 것과 똑같이 `Ctrl+B`를 눌러 빌드하고 `Ctrl+R`을 눌러서 실행도 가능하다.
 
+![terminal-execute](../assets/2019-12-21-vscode-tutorial/terminal-execute.png)
 
+심지어 컨테이너 내부의 쉘에 접근하기 위해 따로 터미널에서 `docker exec -it ubuntu-remote bash`를 실행할 필요도 없다. 그냥 vscode의 TERMINAL 패널이 이미 컨테이너에 접속되어 있다.
 
+![remote-terminal](../assets/2019-12-21-vscode-tutorial/remote-terminal.png)
 
+그래서 C++로 무언가를 개발 할 때 버전에 민감하면서 지저분하게 많이 깔아야 하는 라이브러리를 쓴다면 (boost나 opencv, ros 같은...) 이를 시스템에 직접 깔지 말고 라이브러리가 설치된 도커 이미지를 만들고 컨테이너를 실행해서 쓰는 것이 좋다. 예전엔 이렇게 하면 개발과정이 불편한 점이 있었다. 아무리 폴더를 공유해서 호스트에서 vscode로 코드 편집을 한다고 하더라도 호스트 pc에는 라이브러리가 없기 때문에 자동완성이 되지 않아서 불편했다. 이제 vscode에서 도커 내부 접속까지 알아서 해주니 깔끔하면서도 편리해졌다.   
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+... 이제 vscode 사용법을 알았으니 작업시작이다!
 
