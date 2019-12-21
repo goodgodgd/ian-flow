@@ -2,7 +2,7 @@
 layout: post
 title:  "vscode setup for C++"
 date:   2019-12-21 09:00:01
-categories: research
+categories: tools
 ---
 
 
