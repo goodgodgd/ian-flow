@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "vscode setup for C++"
+title:  "Visual Studio Code setup for C++"
 date:   2019-12-21 09:00:01
 categories: tools
 ---
@@ -8,7 +8,7 @@ categories: tools
 
 
 
-# Visual Studio Code 환경세팅 (C++)
+# Visual Studio Code 개발환경 세팅 (C++)
 
 
 개인적으로 Visual Studio 싫어하기 때문에 그동안 크로스 플랫폼을 지원하는 IDE인 QtCreator를 쓰다가 이제서야 Visual Studio Code (vscode)를 써보기로 했다. Atom이나 Sublime Text처럼 컴파일러 없이 Editing 기능 위주로 되어있고 리눅스에서 설치되고 gcc를 사용할 수 있고 이제는 vscode가 주류가 된지 한참 됐기 때문에 나도 흐름을 따라 보려고 한다.  
@@ -32,7 +32,7 @@ $ sudo snap remove code
 $ code
 ```
 
-vscode를 실행하면 왼쪽에 이런 버튼들이 있다. 버튼에 따라 왼쪽 패널의 내용이 전환된다. 여기 다섯 개의 화면을 잘 알아야 vscode를 잘 쓸 수 있다.
+vscode를 실행하면 왼쪽에 이런 버튼들이 있다. 버튼에 따라 왼쪽 패널의 내용이 전환된다. 여기 다섯 개의 화면을 잘 알아야 vscode를 잘 쓸 수 있다. 확장(extension)을 설치하면 패널이 추가되기도 한다.
 
 ![side-pannel](../assets/2019-12-21-vscode-tutorial/vscode-left.png)
 
@@ -46,7 +46,7 @@ vscode를 실행하면 왼쪽에 이런 버튼들이 있다. 버튼에 따라 �
 
 ### 1.2 C/C++ Extension 설치
 
-vscode는 거의 모든 프로그래밍 언어를 개발할 수 있는 플랫폼 역할을 하고 이 위에 수많은 확장 플러그인(extensions)들이 있다. 특정 언어를 사용하기 위해서는 그에 맞는 플러그인을 설치해야 한다. C/C++을 사용하기 위해서는 `C/C++` 확장을 설치해야 한다.  
+vscode는 거의 모든 프로그래밍 언어를 개발할 수 있는 플랫폼 역할을 하고 이 위에 수많은 확장(extensions)들이 있다. 특정 언어를 사용하기 위해서는 그에 맞는 확장을 설치해야 한다. C/C++을 사용하기 위해서는 `C/C++` 확장을 설치해야 한다.  
 
 오른쪽 [Extensions] 버튼을 누르고 `C/C++`을 검색 후 녹색 [install] 버튼을 눌러 설치한다.
 
@@ -55,7 +55,7 @@ vscode는 거의 모든 프로그래밍 언어를 개발할 수 있는 플랫폼
 
 ## 2. Configuration
 
-vscode는 대부분의 설정을 UI가 아닌 JSON 파일로 관리한다. [File]-[Settings]-[Preferences] (`Ctrl+Comma`)에서 UI를 이용해 전반적인 설정을 바꿀수도 있지만 이것 또한 JSON 파일로 대체 가능하다. 아무래도 사용자들이 프로그래머다보니 텍스트 설정에 거부감이 없고 또한 만들어진 설정을 다른 사람과 공유할 수 있다는 장점이 있다.
+vscode는 대부분의 설정을 UI가 아닌 JSON 파일로 관리한다. [File]-[Settings]-[Preferences] (`Ctrl+Comma`)에서 UI를 이용해 전반적인 설정을 바꿀수도 있지만 이것 또한 JSON 파일로 대체 가능하다. 아무래도 사용자들이 프로그래머다보니 텍스트 설정에 거부감이 없고 또한 만들어진 설정을 다른 사람과 쉽게 공유할 수 있다는 장점이 있다.
 
 ### 2.1 프로젝트 생성
 
@@ -76,7 +76,7 @@ int main()
 }
 ```
 
-참고로 vscode에서 Folder와 Workspace의 차이는 [이 글](<vscode에서 workspace의 개념: <https://stackoverflow.com/a/57134632>>)을 참고하기 바란다. 간단히 말하면 하나의 폴더 아래서 모든 작업을 할 때는 [Open Folder]로 열면 되고 여러개의 루트 폴더가 있는 경우에는 워크스페이스를 만들어야 한다.
+참고로 vscode에서 Folder와 Workspace의 차이는 [이 글](<https://stackoverflow.com/a/57134632>)을 참고하기 바란다. 간단히 말하면 하나의 폴더 아래서 모든 작업을 할 때는 [Open Folder]로 열면 되고 여러개의 루트 폴더가 있는 경우에는 워크스페이스를 만들어야 한다.
 
 
 
@@ -117,7 +117,7 @@ vscode는 특정 언어를 위해 만들어진게 아니라 범용 편집기이�
 }
 ```
 
-- type: `shell` or `process`. `shell` 이면 "command"를 쉘 명령어로서 실행, `process`면 프로세스 실행?
+- type: `shell` or `process`. `shell` 이면 `command`를 쉘 명령어로서 실행, `process`면 프로세스 실행?
 - label: 작업의 이름, 빌드 단축기 Ctrl+Shift+B 를 눌렀을 때 선택할 이름
 - command: 빌드를 실행할 컴파일러
 - args: `command`의 인자
@@ -175,13 +175,13 @@ vscode는 특정 언어를 위해 만들어진게 아니라 범용 편집기이�
 }
 ```
 
-기본 템플릿에서 달라진 점은 `problemMatcher`를 세부 설정한 것과 빌드된 실행파일에 대한 실행 task를 추가한 것이다. `command`가 프로젝트 경로로 이동해 빌드시 만든 실행 파일(`${fileBasenameNoExtension}`)을 실행한다. `group`을 `test`로 했기 때문에 아래 task는 vscode에서 실행 명령을 내릴때 실행된다.  
+기본 템플릿에서 달라진 점은 `problemMatcher`를 세부 설정한 것과 빌드된 실행파일에 대한 실행 task를 추가한 것이다. `command`가 프로젝트 경로로 이동해 빌드하여 만든 실행 파일(`${fileBasenameNoExtension}`)을 실행한다. `group`을 `test`로 했기 때문에 아래 task는 vscode에서 실행 명령을 내릴때 실행된다.  
 
 또 하나는 실행 파일 생성 경로를  소스 파일이 있는 곳이 아닌 `${workspaceFolder}/bin`로 지정한 것이다. 실행 파일과 소스 파일을 분리하기 위한 것인데 그냥 이대로 빌드하면 `${workspaceFolder}/bin` 경로가 없어서 에러가 나므로 **프로젝트 경로에 `bin` 디렉토리를 만들어줘야 한다.**
 
 **[참고자료]** <https://yjcode.tistory.com/1>
 
-#### 수정
+**수정사항**
 
 여기 나온 tasks.json은 `command` 부분은 빼고 나머지만 참고하면 될것 같다. 그 이유는 아래 **3. CMake**에서 확인할 수 있다.
 
@@ -484,7 +484,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 [cmake] Generating done
 ```
 
-CMake Variants의 설정을 바꾸려면 커맨드 팔레트(`Ctrl+Shift+P`) -> `CMake: Select Variant`를 선택하면 네 가지 옵션이 나온다: Debug, Release, MinSizeRel, RelWithDebInfo   
+CMake Variants의 설정을 바꾸려면 [커맨드 팔레트] (`Ctrl+Shift+P`) - [CMake: Select Variant]를 선택하면 네 가지 옵션이 나온다: Debug, Release, MinSizeRel, RelWithDebInfo   
 
 이중에 Release를 선택하고 다시 Configure를 해보면 이제 빌드 타입이 바뀐것을 볼 수 있다.
 
@@ -618,18 +618,13 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 ## 4. Docker 원격 코딩
 
-도커(Docker)가 무엇이고 어떻게 쓰는지는 다음 링크들을 참고하길 바란다. 꼭 다음 개념들이 무엇이고 어떤 역할을 하는지 알고 넘어가야 한다: **Docker, docker image, docker container, Dockerfile, docker-compose, docker-compose.yaml**
+도커(Docker)가 무엇이고 어떻게 쓰는지는 다음 링크들을 참고하길 바란다. 꼭 다음 개념들이 무엇이고 어떤 역할을 하는지 알고 넘어가야 한다: **Docker, docker image, docker container, Dockerfile**
 
 - 도커 컴포즈를 활용하여 완벽한 개발 환경 구성하기: <https://www.44bits.io/ko/post/almost-perfect-development-environment-with-docker-and-docker-compose>
 - Docker with GUI Tutorial (내가 쓴것): <https://goodgodgd.github.io/ian-flow/archivers/docker-tutorial>
 - Docker 설치: <https://docs.docker.com/v17.09/engine/installation/linux/docker-ce/ubuntu/>
-- Docker-compose 설치: <https://docs.docker.com/compose/install/>
-
-아래는 Dockerfile이나 docker-compose.yaml 을 직접 작성할 때 필요한 링크다.
-
 - Dockerfile 작성방법1: <https://docs.docker.com/develop/develop-images/dockerfile_best-practices/>
 - Dockerfile 작성방법2: <https://docs.docker.com/engine/reference/builder>
-- docker-compose.yaml 작성방법: <https://docs.docker.com/compose/compose-file/#compose-file-structure-and-examples>
 
 도커는 주로 웹 개발하는 분들이 많이 쓰는데 나 같은 경우에는 C++ 프로젝트를 개발할 때 필요한 여러가지 라이브러리를 시스템에 직접 설치하는 것이 부담스러워서 도커를 사용한다. C++ 프로젝트는 만들때마다 dependency 버전이 다르기 때문에 예전에 만들었던 프로젝트를 현재 환경에서 다시 실행하는 것이 어렵다. 그래서 1) 시스템 패키지를 깨끗하게 유지하고 2) 나중에 재현 가능한 환경을 만들기 위해 도커를 사용한다.
 
@@ -637,7 +632,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 도커 컨테이너에 접속해서 작업을 하려면 일단 도커 컨테이너를 만들어야 하고 컨테이너에 맞는 이미지가 없으면 이미지부터 빌드해야 한다. 기존에 만들었던 **code_cmake** 프로젝트 안에서 Dockerfile 이라는 파일을 작성한다.  
 
-**Dockerfile**은 도커 이미지를 빌드하기 위해 필요한 파일이다. 어떤 이미지를 기반으로 해서 어떤 설정이나 패키지 설치를 추가하여 새로운 이미지를 만드는 것이다. 아래 예시는 `ubuntu:18.04` 이미지를 기반으로 기본적인 빌드 툴들을 설치한 이미지를 만들도로록 Dockerfile을 작성한 것이다.
+**Dockerfile**은 도커 이미지를 빌드하기 위해 필요한 파일이다. 어떤 이미지를 기반으로 해서 어떤 설정이나 패키지 설치를 추가하여 새로운 이미지를 만드는 것이다. 아래 예시는 `ubuntu:18.04` 이미지를 기반으로 기본적인 빌드 툴들을 설치한 이미지를 만들도록 Dockerfile을 작성한 것이다.
 
 ```dockerfile
 # Ubuntu 18.04를 상속
