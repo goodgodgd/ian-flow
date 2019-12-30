@@ -318,3 +318,40 @@ DSO는 항상 2000여개의 keypoint를 각 프레임 단위로도, 전체 최�
 3. Candidate Point Activation: 예전 점들이 지워지면 새로운 점들로 채우는데 이미지에 되도록 골고루 점들이 분포하게 하기 위해 기존 점들과 가장 거리가 먼 점들부터 채운다.
 4. Outlier and Occlusion Detection: 2에서 epipolar line을 따라 검색할 때 error가 너무 크면 그 점을 버린다. 주변 점들까지 고려한 photometric error가 너무 커도 버린다.
 
+
+
+# 3. VINS-Fusion
+
+
+
+전체적인 구조도다.
+
+![vins-overall](../assets/2019-07-17-savo-survey/vins-overall.jpg)
+
+
+
+## IV. Measurement Preprocessing
+
+### A. Vision Processing Front End
+
+카메라에서 영상이 들어오면 feature를 추적한다. "Good feature to track"으로 특징점을 찾고 KLT optical flow로 추적한다. 영상마다 100~300개의 feature를 추출한다. 특징점 사이에 최소거리 조건을 두어 영상에 고르게 특징점이 추출되도록 한다. 2차원 특징 좌표는 undistort 한 뒤 unit sphere로 projection 한다. RANSAC 알고리즘으로 Fundamental matrix를 계산하여 outlier를 제거한다.  
+
+이 때 keyframe을 고른다. 현재 프레임과 최신 keyframe 사이의 평균 parallax가 threshold를 넘으면 새 keyframe으로 사용한다. 그런데 parallax는 rotation만으로도 생길 수 있으므로 short-term gyro integration을 이용해 parallax를 보정한다. 혹은 tracked feature 수가 일정 threshold 아래로 내려가면 새로운 keyframe을 만든다.  
+
+### B. IMU Preintegration
+
+**Appendix A. Quaternion-based IMU Preintegration**
+
+
+
+![vins-noise-model](../assets/2019-07-17-savo-survey/vins-noise-model.jpg)
+
+- Line 1: acceleration measurement: true acceleration + acc. bias + rotated gravity acc. in body frame at time t + random noise
+- Line 2: gyro rotational speed = true rotational speed + bias + random noise
+
+
+
+![vins-preint1](../assets/2019-07-17-savo-survey/vins-preint1.jpg)
+
+- Line 1: position of b_k+1 in world frame = position of b_k in world frame + movement by constant velocity + movement by acceleration
+
