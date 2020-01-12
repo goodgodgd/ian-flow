@@ -31,14 +31,14 @@ $header-fg: #FFF;
     }
 }
 
-
-
 // Import partials from `sass_dir` (defaults to `_sass`)
+// CUSTOM: change syntax highlighting
 @import
         "base",
         "animate",
         "layout",
-        "syntax-highlighting",
+        // syntax highlighting
+        "igorpro_highlight",
         "easybook",
         "custom"
 ;

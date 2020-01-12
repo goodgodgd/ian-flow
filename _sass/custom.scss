@@ -1,3 +1,8 @@
+// CUSTOM: change colors and sizes
+
+$code-background: #f5f5f5;
+$code-default: #313131;
+
 h3 {
     font-size: 1.4em;
 }
@@ -14,5 +19,16 @@ h4 {
 
     div.MathJax_Display {
         overflow: hidden;
+    }
+}
+
+// article div.highlight pre {
+// }
+
+pre.highlight {
+    background-color: $code-background;
+    code {
+        background-color: $code-background;
+        color: $code-default
     }
 }
