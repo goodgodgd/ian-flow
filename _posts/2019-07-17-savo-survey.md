@@ -324,6 +324,8 @@ DSO는 항상 2000여개의 keypoint를 각 프레임 단위로도, 전체 최�
 
 
 
+## Overview
+
 전체적인 구조도다.
 
 ![vins-overall](../assets/2019-07-17-savo-survey/vins-overall.jpg)
@@ -334,24 +336,142 @@ DSO는 항상 2000여개의 keypoint를 각 프레임 단위로도, 전체 최�
 
 ### A. Vision Processing Front End
 
+#### Feature extraction and tracking
+
 카메라에서 영상이 들어오면 feature를 추적한다. "Good feature to track"으로 특징점을 찾고 KLT optical flow로 추적한다. 영상마다 100~300개의 feature를 추출한다. 특징점 사이에 최소거리 조건을 두어 영상에 고르게 특징점이 추출되도록 한다. 2차원 특징 좌표는 undistort 한 뒤 unit sphere로 projection 한다. RANSAC 알고리즘으로 Fundamental matrix를 계산하여 outlier를 제거한다.  
+
+#### New key frame criterion
 
 이 때 keyframe을 고른다. 현재 프레임과 최신 keyframe 사이의 평균 parallax가 threshold를 넘으면 새 keyframe으로 사용한다. 그런데 parallax는 rotation만으로도 생길 수 있으므로 short-term gyro integration을 이용해 parallax를 보정한다. 혹은 tracked feature 수가 일정 threshold 아래로 내려가면 새로운 keyframe을 만든다.  
 
 ### B. IMU Preintegration
 
-**Appendix A. Quaternion-based IMU Preintegration**
+일반적으로 IMU의 측정 속도(수백Hz)가 카메라(수십Hz)에 비해서 훨씬 빠르기 때문에 두 센서 중 느린 카메라를 기준으로 위치를 추적한다. 카메라 프레임 인덱스를 k라 할 때 다음 프레임인 k+1 사이에는 수십번의 IMU 속도/가속도 측정 정보가 쌓인다. 이 정보를 누적하여 k와 k+1 사이의 상대적인 위치, 이동속도, 회전속도의 변화량을 계산하는 것을 **IMU preintegration**이라고 한다.
 
-
+IMU 센서로부터 읽는 가속도과 회전속도는 다음과 같은 구성 요소가 있다.
 
 ![vins-noise-model](../assets/2019-07-17-savo-survey/vins-noise-model.jpg)
 
-- Line 1: acceleration measurement: true acceleration + acc. bias + rotated gravity acc. in body frame at time t + random noise
-- Line 2: gyro rotational speed = true rotational speed + bias + random noise
+- Eq 1-1) acceleration measurement = true acceleration + acc. bias + rotated gravity acc. in body frame at time t + random noise
+    - 따라서 실제 가속은, $$\mathbf{a}_t = \hat{\mathbf{a}}_t - \mathbf{b} - \mathbf{R}^t_w \mathbf{g}^w - \mathbf{n}_a$$
+    - 실제 가속을 전역좌표계로 변환하면, $$\mathbf{R}^w_t\mathbf{a}_t = \mathbf{R}^w_t \left(\hat{\mathbf{a}}_t - \mathbf{b} - \mathbf{R}^t_w \mathbf{g}^w - \mathbf{n}_a \right) = \mathbf{R}^w_t \left(\hat{\mathbf{a}}_t - \mathbf{b} - \mathbf{n}_a \right) - \mathbf{g}^w$$
+- Eq 1-2) gyro rotational velocity = true rotational velocity + bias + random noise
+    - 따라서 실제 회전 속도는, $$\boldsymbol{\omega}_t = \hat{\boldsymbol{\omega}}_t - \mathbf{b}_{\omega_t} - \mathbf{n}_\omega$$
 
 
+
+#### Quaternion-based IMU Preintegration
+
+Preintegration에 대한 자세한 수식은 Appendix A.에 나와있다. 아래 식은 전역좌표계에서 위치, 이동속도, 회전속도를 IMU 정보를 이용해 시간 k에서 k+1로 업데이트한다. (이건 preintegration이 아니다.)
 
 ![vins-preint1](../assets/2019-07-17-savo-survey/vins-preint1.jpg)
 
-- Line 1: position of b_k+1 in world frame = position of b_k in world frame + movement by constant velocity + movement by acceleration
+- Eq 23-1) position of body at k+1 in world frame = position of body at k in world frame + movement by constant velocity + movement by acceleration
+    - 적분 안에는 Eq 1-1)에서 계산한 true acceration term
+- Eq 23-2) velocity of body at k+1 in world frame = velocity of body at k in world frame + velocity change by acceleration
+- Eq 23-3) quaternion of body at k+1 in world frame = quaternion of body at k in world frame * rotation by rotational velocity
+    - 적분 안에는 Eq 1-2)에서 계산한 true rotational velocity
+
+이렇게 적분하는 방식은 계산식 자체에 추정해야 할 상태인 $$\mathbf{R}^w_t$$가 들어가 있기 때문에 optimization을 하면서 각 프레임의 상태가 변하면 처음부터 다시 integration을 해야하기 때문에 비효율적이다. 그래서 아래와 같은 **preintegration** 알고리즘을 사용한다.
+
+![vins-preint2](../assets/2019-07-17-savo-survey/vins-preint2.png)
+
+앞서 나온 Eq 23-1과 비교하면 superscript(위첨자)가 w에서 b_k로 달라졌다. 이제 전역좌표계가 아닌 시간 k의 지역좌표계에서 계산하는 것이다.
+
+- Eq 25-1, Eq 26-1) Eq 23-1에서 $$\mathbf{R}^{b_k}_\omega$$를 곱하면 첫 번째 식이 나온다.
+    $$
+    \mathbf{p}^{b_k}_{b_{k+1}} = \mathbf{R}^{b_k}_\omega \mathbf{p}^w_{b_{k+1}} \\
+    = \mathbf{R}^{b_k}_\omega \left( \mathbf{p}^{\omega}_{b_k} + \mathbf{v}^{\omega}_{b_k} \Delta t_k \right)
+    + \int\int_{t \in [t_k, t_{k+1}]} \mathbf{R}^{b_k}_\omega \left( \mathbf{R}^w_t \left(\hat{\mathbf{a}}_t - \mathbf{b} - \mathbf{n}_a \right) - \mathbf{g}^w \right) dt^2 \\
+    = \mathbf{R}^{b_k}_\omega \left( \mathbf{p}^{\omega}_{b_k} + \mathbf{v}^{\omega}_{b_k} \Delta t_k \right)
+    + \int\int_{t \in [t_k, t_{k+1}]} \mathbf{R}^{b_k}_\omega \left( \mathbf{R}^w_t \left(\hat{\mathbf{a}}_t - \mathbf{b} - \mathbf{n}_a \right) \right) dt^2
+    + \int\int_{t \in [t_k, t_{k+1}]} \mathbf{g}^w dt^2 \\
+    = \mathbf{R}^{b_k}_\omega \left( \mathbf{p}^{\omega}_{b_k} + \mathbf{v}^{\omega}_{b_k} \Delta t_k - {1 \over 2} \mathbf{g}^\omega \Delta t_k^2 \right)
+    + \int\int_{t \in [t_k, t_{k+1}]} \left( \mathbf{R}^{b_k}_t \left(\hat{\mathbf{a}}_t - \mathbf{b} - \mathbf{n}_a \right) \right) dt^2 \\
+    = \mathbf{R}^{b_k}_\omega \left( \mathbf{p}^{\omega}_{b_k} + \mathbf{v}^{\omega}_{b_k} \Delta t_k - {1 \over 2} \mathbf{g}^\omega \Delta t_k^2 \right) + \boldsymbol{\alpha}^{b_k}_{b_k+1}
+$$
+    
+- Eq 25-2, Eq 26-2) 이동속도도 마찬가지로 Eq 23-2에서 $$\mathbf{R}^{b_k}_\omega$$를 곱하면 두 번째 식이 나온다.
+
+- Eq 25-3, Eq 26-3) 회전속도도 마찬가지로 Eq 23-3에서 $$\mathbf{q}^{b_k}_\omega$$를 곱하면 세 번째 식이 나온다.
+
+식을 보면 여전히 상대적인 위치 이동 $$\mathbf{p}^{b_k}_{b_{k+1}}$$을 계산하기 위해서는 전역좌표계와 연관된  $$b_k$$ 프레임의 상태 $$\mathbf{R}^{b_k}_\omega$$가 들어가긴 하지만 이건 프레임 단위로 한번만 계산하는 것이라 부담이 크진 않다. 중요한 것은 preintegration term인 Eq 26에서 전역좌표계와 관련된 항이 없기 때문에 이건 순수히 $$b_k$$ 프레임의 지역좌표계에서만 계산하게 된다. 그러면 **$$b_k$$ 프레임의 상태가 변하더라도 preintegration term은 다시 계산하지 않아도 된다.**  
+
+다만 preintegration term에서 $$\mathbf{b}$$ (bias estimation)가 변하게 되면 다시 preintegration을 계산해야 하는데 이때 bias 변화가 작으면 first-order talyor expansion으로 근사치를 구하고 bias 변화가 클때만 다시 preintegration을 계산한다. 이러한 방법으로 preintegration의 계산량을 크게 줄일 수 있다.
+
+#### Discrete-time integration
+
+Eq 26의 preintegration term에는 시간에 대한 적분이 들어간다. IMU 데이터는 discrete time으로 들어오기 때문에 적분이 아닌 다른 integration 방법이 필요하다. Discrete-time integration은 여러가지 방법이 있지만 간단한 zero-order hold 방식을 사용한다.
+
+![vins-preint3](../assets/2019-07-17-savo-survey/vins-preint3.png)
+
+식에서 i는 프레임 k와 k+1 사이의 IMU 데이터 인덱스다. 
+
+- Eq 27-1) position at i+1 in b_k frame = position at i + movement by constant velocity + movement by acceleration = position at i + velocity at i * delta t + 1/2 * rotation to b_k frame * (measured acceleration - estimated bias) * delta t^2
+- Eq 27-2) velocity at i+1 in b_k frame = velocity at i + rotation to b_k * (measured acceleration - estimated bias) * delta t
+- Eq 27-3) quaternion at i+1 in b_k frame = quaternion at i * rotation at i = quaternion at i * [1, (measured acceleration - estimated bias) * delta t]
+
+#### Covariance propagation
+
+Preintegration에서는 다섯 개의 state 변수를 추적한다.
+$$
+\mathbf{x} = \begin{bmatrix} \boldsymbol{\alpha}^{b_k}_t &
+\boldsymbol{\beta}^{b_k}_t & \boldsymbol{\theta}^{b_k}_t &
+\mathbf{b}_{a_t} & \mathbf{b}_{w_t}
+\end{bmatrix}
+$$
+state의 error propagtion은 다음식으로 정리할 수 있다.
+
+![vins-preint4](../assets/2019-07-17-savo-survey/vins-preint4.png)
+
+- new errror = transformation matrix * old error + noise
+- $$n_t$$는 가속도, 회전속도, 가속도 편향, 회전속도 편향에 대한 랜덤 노이즈를 의미한다.
+- $$n_t$$의 노이즈 크기는 다음 변수로 정의한다: $$Q = diag \begin{pmatrix} \boldsymbol{\sigma}^2_a & \boldsymbol{\sigma}^2_w & \boldsymbol{\sigma}^2_{b_a} & \boldsymbol{\sigma}^2_{w_t} \end{pmatrix}$$ 
+
+Covariance는 0에서 시작해서 IMU 데이터가 들어올 때마다 Eq 31 같이 업데이트 한다.
+
+![vins-preint5](../assets/2019-07-17-savo-survey/vins-preint5.png)
+
+Jacobian은 $$\mathbf{J}_{k+1} = {\partial\mathbf{x}_{k+1} \over \partial\mathbf{x}_{k}}$$ 이라고 볼 수 있다. 그런데 $$\mathbf{x}_{k+1}$$과 $$\mathbf{x}_k$$의 관계는 수십차례의 적분이 누적된 것이기 때문에 analytical하게 구할 수 없다. 대신 Eq 32처럼 재귀적인 방식으로 데이터가 들어올 때마다 누적해서 구할 수 있다.
+
+#### Bias correction
+
+Eq 26에서 말했다시피 bias가 업데이트 되면 preintegration 결과가 달라져야 한다. bias 업데이트 가 작으면 Talyor expansion으로 근사치를 구한다. Jacobian은 Eq 32에서 구한 것을 쓴다.
+
+![vins-preint6](../assets/2019-07-17-savo-survey/vins-preint6.png)
+$$
+\mathbf{J}^\alpha_{b_\alpha} = {\delta \boldsymbol{\alpha}^{b_k}_{b_{k+1}} 
+\over \delta \mathbf{b}_{\alpha_k}}, \quad
+\mathbf{J}^\alpha_{b_w} = {\delta \boldsymbol{\alpha}^{b_k}_{b_{k+1}} 
+\over \delta \mathbf{b}_{w_k}}, \quad
+\mathbf{J}^\beta_{b_\alpha} = {\delta \boldsymbol{\beta}^{b_k}_{b_{k+1}} 
+\over \delta \mathbf{b}_{\alpha_k}}, \quad
+\mathbf{J}^\beta_{b_w} = {\delta \boldsymbol{\beta}^{b_k}_{b_{k+1}} 
+\over \delta \mathbf{b}_{w_k}}, \quad
+\mathbf{J}^\gamma_{b_w} = {\delta \boldsymbol{\gamma}^{b_k}_{b_{k+1}} 
+\over \delta \mathbf{b}_{w_k}}
+$$
+예시) $$\mathbf{J}^\alpha_{b_\alpha}$$: 프레임 k와 k+1 사이의 상대적인 가속도를 k+1의 가속도 편향으로 미분  
+
+Eq 33은 bias estimation의 변화인 ($$\delta \mathbf{b}_{\alpha_k}, \ \delta \mathbf{b}_{w_k}$$)에 따라 preintegration 값을 업데이트 한다. 
+
+만약 bias estimation이 optimization을 통해서 크게 변한다면 다시 Eq 27을 통해 preintegration을 해야한다.
+
+
+
+## V. Estimator Initialization
+
+### A. Vision-only SfM in Sliding Window
+
+
+
+
+
+
+
+
+
+
+
+
 
