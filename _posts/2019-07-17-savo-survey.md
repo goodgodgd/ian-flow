@@ -362,7 +362,7 @@ IMU 센서로부터 읽는 가속도과 회전속도는 다음과 같은 구성 
 
 #### Quaternion-based IMU Preintegration
 
-Preintegration에 대한 자세한 수식은 Appendix A.에 나와있다. 아래 식은 전역좌표계에서 위치, 이동속도, 회전속도를 IMU 정보를 이용해 시간 k에서 k+1로 업데이트한다. (이건 preintegration이 아니다.)
+Preintegration에 대한 자세한 수식은 Appendix A.에 나와있다. Eq 23은 전역좌표계에서 위치, 이동속도, 회전속도를 IMU 정보를 이용해 시간 k에서 k+1로 업데이트한다. (Eq 23은 preintegration이 아니다.)
 
 ![vins-preint1](../assets/2019-07-17-savo-survey/vins-preint1.jpg)
 
@@ -378,7 +378,9 @@ Preintegration에 대한 자세한 수식은 Appendix A.에 나와있다. 아래
 
 앞서 나온 Eq 23-1과 비교하면 superscript(위첨자)가 w에서 b_k로 달라졌다. 이제 전역좌표계가 아닌 시간 k의 지역좌표계에서 계산하는 것이다.
 
-- Eq 25-1, Eq 26-1) Eq 23-1에서 $$\mathbf{R}^{b_k}_\omega$$를 곱하면 첫 번째 식이 나온다.
+- Eq 25-1, Eq 26-1) Eq 23-1에서 $$\mathbf{R}^{b_k}_\omega$$를 곱하면 첫 번째 식이 나온다.  
+  
+  
     $$
     \mathbf{p}^{b_k}_{b_{k+1}} = \mathbf{R}^{b_k}_\omega \mathbf{p}^w_{b_{k+1}} \\
     = \mathbf{R}^{b_k}_\omega \left( \mathbf{p}^{\omega}_{b_k} + \mathbf{v}^{\omega}_{b_k} \Delta t_k \right)
@@ -390,7 +392,8 @@ Preintegration에 대한 자세한 수식은 Appendix A.에 나와있다. 아래
     + \int\int_{t \in [t_k, t_{k+1}]} \left( \mathbf{R}^{b_k}_t \left(\hat{\mathbf{a}}_t - \mathbf{b} - \mathbf{n}_a \right) \right) dt^2 \\
     = \mathbf{R}^{b_k}_\omega \left( \mathbf{p}^{\omega}_{b_k} + \mathbf{v}^{\omega}_{b_k} \Delta t_k - {1 \over 2} \mathbf{g}^\omega \Delta t_k^2 \right) + \boldsymbol{\alpha}^{b_k}_{b_k+1}
     $$
-    
+
+
 - Eq 25-2, Eq 26-2) 이동속도도 마찬가지로 Eq 23-2에서 $$\mathbf{R}^{b_k}_\omega$$를 곱하면 두 번째 식이 나온다.
 
 - Eq 25-3, Eq 26-3) 회전속도도 마찬가지로 Eq 23-3에서 $$\mathbf{q}^{b_k}_\omega$$를 곱하면 세 번째 식이 나온다.
@@ -407,9 +410,12 @@ Eq 26의 preintegration term에는 시간에 대한 적분이 들어간다. IMU 
 
 식에서 i는 프레임 k와 k+1 사이의 IMU 데이터 인덱스다. 
 
-- Eq 27-1) position at i+1 in b_k frame = position at i + movement by constant velocity + movement by acceleration = position at i + velocity at i * delta t + 1/2 * rotation to b_k frame * (measured acceleration - estimated bias) * delta t^2
-- Eq 27-2) velocity at i+1 in b_k frame = velocity at i + rotation to b_k * (measured acceleration - estimated bias) * delta t
-- Eq 27-3) quaternion at i+1 in b_k frame = quaternion at i * rotation at i = quaternion at i * [1, (measured acceleration - estimated bias) * delta t]
+- Eq 27-1) 가속도에 의한 상대적인 위치 변화, 중력 가속도 g에 의한 위치 변화는 Eq 25로 빠짐
+    - position at i+1 in b_k frame = position at i + movement by constant velocity + movement by acceleration = position at i + velocity at i * delta t + 1/2 * rotation to b_k frame * (measured acceleration - estimated bias) * delta t^2
+- Eq 27-2) 가속도에 의한 상대적인 속도 변화, 중력 가속도 g에 의한 속도 변화는 Eq 25로 빠짐
+    - velocity at i+1 in b_k frame = velocity at i + rotation to b_k * (measured acceleration - estimated bias) * delta t
+- Eq 27-3) 회전속도에 의한 자세 변화
+    - quaternion at i+1 in b_k frame = quaternion at i * rotation at i = quaternion at i * [1, (measured acceleration - estimated bias) * delta t]
 
 #### Covariance propagation
 
@@ -421,6 +427,7 @@ $$
 \mathbf{b}_{a_t} & \mathbf{b}_{w_t}
 \end{bmatrix}
 $$
+
 state의 error propagtion은 다음식으로 정리할 수 있다.
 
 ![vins-preint4](../assets/2019-07-17-savo-survey/vins-preint4.png)
@@ -437,7 +444,7 @@ Jacobian은 $$\mathbf{J}_{k+1} = {\partial\mathbf{x}_{k+1} \over \partial\mathbf
 
 #### Bias correction
 
-Eq 26에서 말했다시피 bias가 업데이트 되면 preintegration 결과가 달라져야 한다. bias 업데이트 가 작으면 Talyor expansion으로 근사치를 구한다. Jacobian은 Eq 32에서 구한 것을 쓴다.
+Eq 26에서 말했다시피 bias가 업데이트 되면 preintegration 결과가 달라져야 한다. bias 업데이트가 작으면 Talyor expansion으로 근사치를 구한다. Jacobian은 Eq 32에서 구한 것을 쓴다.
 
 ![vins-preint6](../assets/2019-07-17-savo-survey/vins-preint6.png)
 $$
@@ -464,7 +471,35 @@ Eq 33은 bias estimation의 변화인 ($$\delta \mathbf{b}_{\alpha_k}, \ \delta 
 
 ## V. Estimator Initialization
 
+Monocular tightly coupled VIO는 highly nonlinear system이기 때문에 정확한 초기화가 중요하다. IMU pregintegration 결과와 비전 정보를 약하게 결합해 초기값을 구한다.
+
 ### A. Vision-only SfM in Sliding Window
+
+Vision-only SfM은 up-to-scale 카메라 포즈와 점 위치를 추정한다. 연산량 유지를 위해 일정한 time window 내의 최근 몇 개의 프레임만 유지하고 현재 프레임과 최근 프레임들 사이에 Bundle Adjustment를 한다. 
+
+1. 현재 프레임과 매칭이 잘 되고 (30 point 이상) parallax가 충분한 (20 pixel 이상) 최근 프레임을 선택한다. 
+2. Five-point algorithm으로 up-to-scale pose를 구하고 임의의 스케일에서 모든 점들의 좌표를 계산한다.
+3. Perspective n-point (PnP) method로 모든 다른 프레임의 포즈를 구한다.
+4. Full bundle adjustment를 통해 reprojection error를 최소화 하도록 첫 번째 카메라 프레임 $$c_0$$를 기준으로 모든 프레임의 포즈와 점들의 위치를 최적화 한다. $$\to (\bar{\mathbf{p}}^{c_0}_{c_k}, \bar{\mathbf{q}}^{c_0}_{c_k})$$
+5. 카메라와 IMU 사이의 알려진 관계를 $$(\mathbf{p}^b_c, \mathbf{q}^b_c)$$ 이용해 $$c_0$$ 프레임의 $$c_k$$ 포즈들을 $$b_k$$ 포즈로 변환한다. 기준 좌표계는 $$c_0$$ 그대로 쓴다. $$s$$는 BA에서 추정하지 못 한 scaling factor다
+
+![vins-initial1](../assets/2019-07-17-savo-survey/vins-initial1.png)
+
+### B. Visual Inertial Alignment
+
+#### 1) Gyroscopo Bias Calibration
+
+더욱 정확한 preintegration 값을 얻기 위해 gyroscope bias $$\mathbf{b}_w$$를 업데이트하고 그에 따라 pregintegration을 Eq 33으로 보정한다. gyroscopo bias는 $$\mathbf{b}_w \leftarrow \mathbf{b}_w \otimes \delta \mathbf{b}_w$$ 로 업데이트 하는데 $$\delta \mathbf{b}_w$$는 다음 식으로 구한다. 
+
+![vins-initial2](../assets/2019-07-17-savo-survey/vins-initial2.png)
+
+최적화 변수인 $$\delta \mathbf{b}_w$$는 아래의 $$\boldsymbol{\gamma}^{b_k}_{b_{k+1}}$$ 식에 숨어있다. $${\mathbf{q}^{c_0}_{b_{k+1}}}^{-1} \otimes \mathbf{q}^{c_0}_{b_k} = \mathbf{q}^{b_{k+1}}_{b_k}$$ 는 SfM으로 구한 $$k+1 \to k$$ 방향 회전이고 $$\gamma^{b_k}_{b_{k+1}}$$은 IMU preintegration으로 구한 $$k \to k+1$$ 방향 회전이다. 만약 두 가지 방법으로 구한 회전이 같다면 identity quaternion이 나와야 하지만 bias가 있다면 차이가 날 것이다. 둘의 차이를 최소화하는 $$\delta \mathbf{b}_w$$를 구해서 gyroscope bias $$\mathbf{b}_w$$를 업데이트 한다.  
+
+Eq 7에서 cost function을 quaternion의 L2-norm으로 한건 아마도 $$[qw,qx,qy,qz]$$ 중에서 $$qw$$를 제외하고 나머지의 크기를 의미한 것 같다.  
+
+이렇게 gyroscope bias를 계산하고 나면 Eq 33으로 preintegration 값들을 보정한다.
+
+#### Velocity, ..., Scale Initialization
 
 
 
