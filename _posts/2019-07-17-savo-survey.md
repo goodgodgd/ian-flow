@@ -389,7 +389,7 @@ Preintegration에 대한 자세한 수식은 Appendix A.에 나와있다. 아래
     = \mathbf{R}^{b_k}_\omega \left( \mathbf{p}^{\omega}_{b_k} + \mathbf{v}^{\omega}_{b_k} \Delta t_k - {1 \over 2} \mathbf{g}^\omega \Delta t_k^2 \right)
     + \int\int_{t \in [t_k, t_{k+1}]} \left( \mathbf{R}^{b_k}_t \left(\hat{\mathbf{a}}_t - \mathbf{b} - \mathbf{n}_a \right) \right) dt^2 \\
     = \mathbf{R}^{b_k}_\omega \left( \mathbf{p}^{\omega}_{b_k} + \mathbf{v}^{\omega}_{b_k} \Delta t_k - {1 \over 2} \mathbf{g}^\omega \Delta t_k^2 \right) + \boldsymbol{\alpha}^{b_k}_{b_k+1}
-$$
+    $$
     
 - Eq 25-2, Eq 26-2) 이동속도도 마찬가지로 Eq 23-2에서 $$\mathbf{R}^{b_k}_\omega$$를 곱하면 두 번째 식이 나온다.
 
@@ -414,6 +414,7 @@ Eq 26의 preintegration term에는 시간에 대한 적분이 들어간다. IMU 
 #### Covariance propagation
 
 Preintegration에서는 다섯 개의 state 변수를 추적한다.
+
 $$
 \mathbf{x} = \begin{bmatrix} \boldsymbol{\alpha}^{b_k}_t &
 \boldsymbol{\beta}^{b_k}_t & \boldsymbol{\theta}^{b_k}_t &
@@ -451,6 +452,8 @@ $$
 \mathbf{J}^\gamma_{b_w} = {\delta \boldsymbol{\gamma}^{b_k}_{b_{k+1}} 
 \over \delta \mathbf{b}_{w_k}}
 $$
+
+
 예시) $$\mathbf{J}^\alpha_{b_\alpha}$$: 프레임 k와 k+1 사이의 상대적인 가속도를 k+1의 가속도 편향으로 미분  
 
 Eq 33은 bias estimation의 변화인 ($$\delta \mathbf{b}_{\alpha_k}, \ \delta \mathbf{b}_{w_k}$$)에 따라 preintegration 값을 업데이트 한다. 
