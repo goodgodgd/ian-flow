@@ -643,3 +643,114 @@ GT 데이터가 있을 때는 smoothness loss를 다음과 같은 gradient simil
 
 ![RNN-MVOD7](../assets/2019-06-27-vode-survey/RNN-MVOD7.png)
 
+
+
+---
+
+2020.02 업데이트 입니다.
+
+# 9. Competitive Collaboration
+
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>제목</th>
+<th>Competitive Collaboration: Joint Unsupervised Learning of Depth, Camera Motion, Optical Flow and Motion Segmentation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">저자</td>
+<td markdown="span">Anurag Ranjan, Varun Jampani, Lukas Balles, Kihwan Kim, Deqing Sun, Jonas Wulff, Michael J. Black</td>
+</tr>
+<tr>
+<td markdown="span">출판</td>
+<td markdown="span">CVPR, 2019</td>
+</tr>
+</tbody>
+</table>
+
+
+
+## 특징
+
+네트워크가 네 개고 출력도 네 가지다. 네 가지 task를 비지도 학습으로 학습할 수 있다. 5 frame sequence $$(I_{--}, I_-, I, I_+, I_{++})$$를 기준으로 학습하는데 아래 표기에서는 편의상 3 frame으로만 표기한다.
+
+1. Monocular depth prediction 
+    - $$d = D_\theta(I)$$ : single image $$\to$$ single depth map
+2. Camera motion estimation
+    - $$e_-, e_+ = C_\phi(I_-, I, I_+)$$ : 5 frame sequence $$\to$$ camera poses of 4 source frames
+3. Optical flow estimation
+    - $$u_- = F_\psi(I, I_-), u_+ = F_\psi(I, I_+)$$ : pairs of source and target frames $$\to$$ optical flow maps
+4. Motion segmentation
+    - $$m_-, m_+ = M_\chi(I_-, I, I_+)$$ :  5 frame sequence $$\to$$ segmentation masks of 4 source frames
+
+아래 그림만 봐도 대충 이해가 된다.
+
+![competitive2](../assets/2019-06-27-vode-survey/competitive2.jpg)
+
+![competitive1](../assets/2019-06-27-vode-survey/competitive1.jpg)
+
+그림 왼쪽: 원본 영상, motion segmentation, depth map / 오른쪽: static flow, optical flow, combined flow
+
+"Competitive"는 motion과 depth에 의한 static flow와 예측된 optical flow 사이의 경쟁이다. "Collaborative"에서는 motion, depth, optical flow는 고정시키고 이들을 조합하는 motion segmentation을 학습한다. 두 가지를 돌아가면서 반복학습하면 moving object를 자연스럽게 처리할 수 있고 다양한 출력을 함께 학습할 수 있다. 다만 학습 과정이 좀 복잡하다.
+
+## Loss
+
+이 논문에는 무려 다섯가지 Loss가 있다.
+
+![competitive-loss1](../assets/2019-06-27-vode-survey/competitive-loss1.png)
+
+### a. Photmetric loss from rigid flow
+
+Depth와 Camera motion으로만 구한 rigid flow의 photometric loss다. Target frame $$I$$와 source frame으로부터 만들어진 $$w_c(I_s,e_s,d)$$ 사이의 차이에 segmentation mask를 픽셀별로 곱한다. segmentation mask가 1이면 static scene으로 판단한 것이고 0이면 dynamic scene으로 판단한 것이다.
+
+![competitive-loss2](../assets/2019-06-27-vode-survey/competitive-loss2.png)
+
+![competitive-loss3](../assets/2019-06-27-vode-survey/competitive-loss3.png)
+
+$$\rho$$는 robust error fuction인데 첫 번째 항은 선형적인 L1 loss 대신 완만하게 줄어드는 함수고, 두 번째 항의 분수는 SSIM(Structural Similarity) 이고 이것을 1에서 뺀 것이므로 DSSIM(Structural Dissimilarity) 이라고 볼 수 있다.
+
+Segmentation mask가 제대로 학습되면 depth와 pose 학습시 moving object에 의해 학습이 오염되는 것을 막을 수 있다.
+
+### b. Photometric loss from optical flow
+
+Rigid flow와는 독립적으로 모든 픽셀에 대해 optical flow를 구하고 optical flow에 대한 photometric loss에 segmentation mask를 반대로 곱한다. 이것도 마찬가지로 robust error function을 활용한다.
+
+![competitive-loss4](../assets/2019-06-27-vode-survey/competitive-loss4.png)
+
+### c. Mask regularization
+
+$$E_M$$은 segmentation mask를 상수 1과 cross-entropy를 구하여 loss로 사용한다. 즉 왠만하면 static scene으로 판단하도록 유도한다. $$H(\mathbf{1}, m_s) = -log(m_s)$$ 라서 사실상 segmentation mask가 0으로 수렴하지 못하게 한다. $$\lambda_M$$이 크면 클수록 static scene이 우세하게 학습한다.
+
+![competitive-loss5](../assets/2019-06-27-vode-survey/competitive-loss5.png)
+
+### d. Consensus loss
+
+$$E_C$$는 rigid flow와 optical flow를 비교하여 segmentation mask가 적절한 쪽을 선택하도록 유도한다.
+
+![competitive-loss6](../assets/2019-06-27-vode-survey/competitive-loss6.png)
+
+$$\mathbb{I} \in \left\{ 0,1 \right\}$$는 indicator fuction이다. Subscript가 참이면 1, 거짓이면 0이다. Cross-entropy에서 첫 번째 항은 rigid flow의 loss가 optical flow loss 보다 낮거나 두 개의 flow가 비슷하면 1이 되어 static pixel로 판단하고 아니면 dynamic pixel로 판단한다. 이렇게 0과 1로 만들어진 boolean map과 같아지도록 segmentation mask를 학습한다.
+
+### e. Smootheness loss
+
+Depth, optical flow, segmentation mask에 대해 smootheness 조건을 준다. Image gradient에 반비례한 가중치를 준다.
+
+![competitive-loss7](../assets/2019-06-27-vode-survey/competitive-loss7.png)
+
+## Training
+
+네트워크가 많다보니 학습과정이 좀 복잡하다.
+
+![competitive-train](../assets/2019-06-27-vode-survey/competitive-train.png)
+
+Loop 위의 내용은 Depth+Pose, Optical flow, Motion segmentation을 각기 따로 학습하여 랜덤한 출력이 나오지 않고 각기 어느정도 성능이 나오도록 네트워크들을 초기화하는 것이다.  
+
+그 다음에는 competition과 collaboration을 번갈아가며 학습한다. Competitive step은 segmentation mask가 정해진 상태에서 rigid flow와 optical flow를 따로 학습하는 것이다. Collaborative step은 현재 수준에서 나오는 rigid flow와 optical flow를 기반으로 segmentation mask를 다시 학습하는 과정이다.  
+
+이렇게 번갈아가며 학습하면 rigid flow(depth+pose)는 static pixel에 대해서만 학습하고 optical flow는 dynamic pixel에 대해서만 학습하게 된다.
