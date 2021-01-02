@@ -15,9 +15,9 @@ Reference: An Invitation to 3-D vision, Chapter 2.
 |         | Rotation | Transformation |
 |:--------|:--------|:--------|
 | vector form | $ w \in \mathbb{R}^3 $ | $ \xi = \begin{bmatrix} w & v \end{bmatrix}^T \in \mathbb{R}^6 $<br>: twist coordinates |
-| exponential coordinates | $ \hat{w} \in so(3) \subset \mathbb{R}^{3 \times 3} $  $$ \widehat{w} \doteq  \begin{bmatrix} 0 & -w_3 & w_2 \\ w_3 & 0 & -w_1 \\ -w_2 & w_1 & 0 \end{bmatrix} $$ | $ \hat{\xi} \in se(3) \subset \mathbb{R}^{4 \times 4} $: twist  $$ \widehat{\xi} \doteq \begin{bmatrix} \widehat{w} & v \\ 0 & 0 \end{bmatrix} $$ |
+| exponential coordinates | $ \widehat{w} \in so(3) \subset \mathbb{R}^{3 \times 3} $  $ \widehat{w} \doteq  \begin{bmatrix} 0 & -w_3 & w_2 \\\\ w_3 & 0 & -w_1 \\\\ -w_2 & w_1 & 0 \end{bmatrix} $ | $ \hat{\xi} \in se(3) \subset \mathbb{R}^{4 \times 4} $<br>: twist  $ \widehat{\xi} \doteq \begin{bmatrix} \widehat{w} & v \\\\ 0 & 0 \end{bmatrix} $ |
 | matrix form | $ R = e^{\hat{w}} \in SO(3) \subset \mathbb{R}^{3 \times 3} $ | $ T = e^{\hat{\xi}} \in SE(3) \subset \mathbb{R}^{4 \times 4} $ |
-| exponential map | $$e^{\widehat{w}t} = I + \widehat{w}sin(t) + \widehat{w} ^2 (1-cos(t))$$ where $$ \begin{Vmatrix} w \end{Vmatrix}=1 $$ | $$ e^{\widehat{\xi}t}  = \begin{bmatrix} e^{\widehat{w}} & \left( I - e^{\widehat{w}} \right) \widehat{w} v + w \widehat{w}^T v \\ 0 & 1 \end{bmatrix} $$ |
+| exponential map | $ e^{\widehat{w}t} = I + \widehat{w}sin(t) + \widehat{w} ^2 (1-cos(t)) $ where $ \begin{Vmatrix} w \end{Vmatrix}=1 $ | $ e^{\widehat{\xi}t}  = \begin{bmatrix} e^{\widehat{w}} & \left( I - e^{\widehat{w}} \right) \widehat{w} v + w \widehat{w}^T v \\\\ 0 & 1 \end{bmatrix} $ |
 
 
 
@@ -67,6 +67,7 @@ $$
 > 
 
 > **Euclidean transformation**: a map that preserves the Euclidean distance between every pair of points. The set of all Euclidean transformation in 3-D space is denoted by $ E(3) $.
+> 
 > $$
 > g: \mathbb{R}^3 \to \mathbb{R}^3; X \mapsto g(X)
 > $$
@@ -125,8 +126,8 @@ $$
 r_1=g_*(e_1), r_2=g_*(e_2), r_3=g_*(e_3) \in \mathbb{R}^3. 
 $$
 
-Then the configuration of the rotating object  is determined by the $ 3 \times 3 $ matrix $$
-R_{wc} \doteq \begin{bmatrix} r_1, r_2, r_3 \end{bmatrix} \in \mathbb{R}^3  $$
+Then the configuration of the rotating object  is determined by the $ 3 \times 3 $ matrix $
+R_{wc} \doteq \begin{bmatrix} r_1, r_2, r_3 \end{bmatrix} \in \mathbb{R}^3  $
 
 Since $ r_1, r_2, r_3 $ form an orthonormal frame, 
 
@@ -164,8 +165,7 @@ $ R_{wc} $ transforms the coordinates $ X_c $ in the frame $ C $ to its coordina
 
 ### 2.3.2 Canonical exponential coordinates for rotations
 
-Given a trajectory $ R(t) $ that describes a continuous rotational motion, the rotation must satisfy 
-$$ R(t)^TR(t) = I$$.
+Given a trajectory $ R(t) $ that describes a continuous rotational motion, the rotation must satisfy $ R(t)^TR(t) = I$.
 
 By computing the derivative with respect to time $ t $,
 
@@ -262,7 +262,7 @@ The set of all possible configurations of a rigid body can then be described by 
 
 ### 2.4.1 Homogeneous representation
 
-Rigid body motion, $ X_w = R_{wc}X_c + T_{wc} $, is not linear but affine. An affine transformation can be converted to linear on by homogeneous coordinates. In homogeneous coordinates, a point $ p \in \mathbb{R}^3 $ and a vector $ v \in \mathbb{R}^3 $ are represented as
+Rigid body motion, \( X_w = R_{wc}X_c + T_{wc} \), is not linear but affine. An affine transformation can be converted to linear on by homogeneous coordinates. In homogeneous coordinates, a point $ p \in \mathbb{R}^3 $ and a vector $ v \in \mathbb{R}^3 $ are represented as
 
 $$
 \begin{aligned}
@@ -283,7 +283,7 @@ $$
 \doteq \bar{g}_{wc} \bar{X}_c
 $$
 
-$$ \bar{g}_{wc} \in \mathbb{R}^{4 \times 4} $$  is called the *homogeneous representation* of the rigid-body motion $ g_{wc} = \left( R_{wc}, T_{wc} \right) \in SE(3) $. 
+$ \bar{g}\_{wc} \in \mathbb{R}^{4 \times 4} $ is called the *homogeneous representation*  of the rigid-body motion $ g_{wc} = \left( R\_{wc}, T\_{wc} \right) \in SE(3) $. 
 
 We can represent a rigid-body transformation of coordinates by a linear matrix multiplication. A matrix representation of the special Euclidean transformation is given by
 

@@ -35,6 +35,7 @@ paginate_path: "page:num"
 highlighter: rouge
 markdown: kramdown
 
+
 avatar: "/ian-flow/assets/sidebar/avatar.jpg"
 
 # https://jekyllrb.com/docs/configuration/#precedence
