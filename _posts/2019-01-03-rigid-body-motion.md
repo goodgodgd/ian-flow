@@ -262,7 +262,7 @@ The set of all possible configurations of a rigid body can then be described by 
 
 ### 2.4.1 Homogeneous representation
 
-Rigid body motion, \( X_w = R_{wc}X_c + T_{wc} \), is not linear but affine. An affine transformation can be converted to linear on by homogeneous coordinates. In homogeneous coordinates, a point $ p \in \mathbb{R}^3 $ and a vector $ v \in \mathbb{R}^3 $ are represented as
+Rigid body motion, \\( X_w = R_{wc}X_c + T_{wc} \\), is not linear but affine. An affine transformation can be converted to linear on by homogeneous coordinates. In homogeneous coordinates, a point $ p \in \mathbb{R}^3 $ and a vector $ v \in \mathbb{R}^3 $ are represented as
 
 $$
 \begin{aligned}

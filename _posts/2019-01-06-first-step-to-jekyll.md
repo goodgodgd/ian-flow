@@ -157,3 +157,84 @@ baseurl: "/[repo name]"
 `url: "https://[username].github.io/[repo name]"`  
 
 그랬더니 이제 페이지가 보인다!! 오늘도 수고했다며 셀프 칭찬을 하고... ~~자야겠다.~~
+
+
+
+### 2021.1.3 업데이트: 수식입력시 주의사항
+
+지킬의 왠만한 테마는 다 기본적으로 mathjax라는 수식 렌더링 서비스를 사용하고 있다. Tex형식으로 수식을 입력하면 아래와 같이 아름다운 수식으로 그려서 보내준다.  
+
+```
+$f(x)=x^2$
+```
+
+$f(x)=x^2$
+
+그런데 2020년 언젠가부터 이 렌더링이 되지 않아서 `$f(x)=x^2$` 이런 문자열이 그대로 보이게 됐다. 왜 그런고 봤더니 mathjax 버전이 2에서 3으로 올라간것 같다. 기존에 수식 렌더링을 위해 썼던 스크립트는 다음과 같다. 맨마지막에 `latest` 버전을 사용하도록 설정이 돼서 작동이 안하는거라고 추측한다.
+
+```html
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    <!-- TeX: { equationNumbers: { autoNumber: "AMS" } }, -->
+    tex2jax: {
+      inlineMath: [ ['$','$'], ['\(', '\)'] ],
+      displayMath: [ ['$$','$$'] ],
+      processEscapes: true,
+    }
+  });
+  MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+	alert("Math Processing Error: "+message[1]);
+	});
+  MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+	alert("Math Processing Error: "+message[1]);
+	});
+</script>
+
+<script type="text/javascript" async
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+```
+
+
+
+근데 MathJax 3.x를 사용하는 방법은 검색해도 많이 안나오고 살짝 해봤는데 행렬이 제대로 렌더링이 되지 않고 이를 해결할 방법을 찾기도 좀 귀찮아서 MathJax 2.x를 계속 사용하도록 설정을 바꿨다. 맨 아래줄을 보면 `2.7.2`로 설정했다.
+
+```html
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    <!-- TeX: { equationNumbers: { autoNumber: "AMS" } }, -->
+    tex2jax: {
+      inlineMath: [ ['$','$'], ['\\(', '\\)'] ],
+      processEscapes: true,
+    }
+  });
+</script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'></script>
+```
+
+
+
+그런데도 기존에 잘 되던 Tex가 렌더링이 잘 안되는 케이스가 있었다. 이건 아마 내가 2.x 버전에서도 낮은 버전을 쓰다가 2.7로 올리면서 생긴 현상 같다.
+
+- **`_` 사용**: $X\_{ab}$ 를 만들고 싶다면 `$X_{ab}$`가 아닌 `$X\_{ab}$`로 써야한다. kramdown에서 `_`를 문자 기울임 표시로 인식 하기 때문에 일단 kramdown에서 `_`를 렌더링 하기 위해서는 `\_`을 써야한다.
+
+- **inline matrix**: inline matrix에서 `\\`를 통해 줄내림이 원래는 됐었는데 이제 안된다. inline matrix에서 줄 내림을 위해서는 `\\\\` 이렇게 네 번의 back slash를 써야한다.
+
+  $ \widehat{\xi} \doteq \begin{bmatrix} \widehat{w} & v \\\\ 0 & 0 \end{bmatrix} $
+
+  ```
+  $ \widehat{\xi} \doteq \begin{bmatrix} \widehat{w} & v \\\\ 0 & 0 \end{bmatrix} $
+  ```
+
+- 위와 같이 설정하면 `$ ... $` 뿐만 아니라 `\\( ... \\)`으로도 블로그에서 inline 렌더링이 된다. 또한 `\\[ ... \\]`으로는 일반 수식이 렌더링된다. 하지만 Typora에서 안되기 때문에 안 쓸것 같다.
+
+
+
+#### 참고자료
+
+- <https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference>: 풍부한 Tex 예제가 있어 참고
+- <http://docs.mathjax.org/en/latest/input/tex/html.html>: 기본 Tex와 MathJax 문법 차이
+- <http://docs.mathjax.org/en/latest/upgrading/v2.html>: MathJax v2 to v3
+
+
+
