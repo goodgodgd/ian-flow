@@ -1,19 +1,19 @@
 ---
 layout: post
 title:  "Transformer"
-date:   2021-01-02 09:00:03
+date:   2022-01-02 09:00:03
 categories: research
 ---
 
 
 
-## Introduction
+# Introduction
 
 본 포스트는 철저히 내가 공부한 내용을 쉽게 리마인드 하기위해 작성하였다. 앞뒤 내용 빼고 몸통만 설명하므로 자세한 설명이 필요한 분들은 다른 곳을 찾아보시길 바란다.  
 
 
 
-## 1. Attention Is All You Need
+# 1. Attention Is All You Need
 
 <table>
 <colgroup>
@@ -41,7 +41,7 @@ categories: research
 
 
 
-### 1.1. Model Architecture
+## 1.1. Model Architecture
 
 <img src="../assets/transformer/transformer-overall-architecture.png" alt="transformer-overall-architecture" width="500"/>
 
@@ -51,9 +51,9 @@ categories: research
 
 
 
-#### A. Encoder
+### A. Encoder
 
-##### A.1 Inputs
+#### A.1 Inputs
 
 'GNU', 'is', 'Not', 'Unix' 각각을 word2vec 같은 워드 임베딩을 통해 벡터로 만든다. 전체 입력의 길이를 $$L_{in}(=4)$$이라 한다. 입력을 하나씩 순서대로 임베딩 하는게 아니라 한번에 모두 임베딩을 계산해야 한다. 임베딩의 결과는 $$M (L_{in},d_{model})$$ 이다.  
 
@@ -63,7 +63,7 @@ Input Embedding에는 순서를 알려주기 위해 다음과 같은 Positional 
 
 
 
-##### A.2. Linear
+#### A.2. Linear
 
 인코더에는 모든 입력이 한번에 들어간다. $$(L_{in},d_{model})$$ 모양의 입력이 Query, Key, Value 세 갈래로 들어간다. 각각은 linear 레이어를 통과하여 서로 다른 특성을 학습하게 한다. Multi-Head Attention에서는 여러개의 attention을 위한 다른 입력을 만들어야 하기 때문에 $$h(=8)$$개의 Head가 있다면 사실상 linear 레이어의 출력 차원이 $$h$$배가 되는 셈이다.
 
@@ -75,7 +75,7 @@ Query, Key, Value 모두 처음에는 $$(L_{in},d_{model})$$ 이었는데 각 he
 
 실제 구현을 한다면 $$h$$개의 head를 위해 따로 linear 레이어를 구성하기 보다는 출력 차원이 $$h * d_k$$인 하나의 linear 레이어로 최적화 할 것 같다.  
 
-##### A.3. Self-attention
+#### A.3. Self-attention
 
 **Self-attention 내부에는 학습 파라미터가 없다.** "Scaled Dot-Product Attention"그림에 나온대로 단순히 아래 식을 계산할 뿐이다. $$\sqrt{d_k}$$ 로 나눠주는 이유는 학습 효율을 개선하기 위함이다. Dimension이 늘어날수록 전반적으로 dot product($$QK^T$$)의 크기 편차가 커지고 그에 따라 softmax결과로 0에 가까운 값이 많이 나와서 gradient도 0에 가깝게 나온다. Dimension에 비례하여 dot product의 스케일을 줄이면 이러한 현상을 완화할 수 있다고 한다.
 
@@ -89,7 +89,7 @@ $$QK^TV$$의 차원은 $$(L_{in},d_k) \times (d_k,L_{in}) \times (L_{in},d_v) = 
 
 
 
-##### A.4. Multi-head attention
+#### A.4. Multi-head attention
 
 Multi-head attention에서는 self-attention을 여러개 사용하는데 이건 마치 CNN의 convolution에서 채널 마다 다른 특징을 추출하는 것과 비슷한 것 같다. Self-attention도 하나만 있으면 정확한 문맥 파악을 잘 못 할수 있지만 여러가지 self-attention을 쓰면 다양한 문맥적 의미를 탐색하여 최종적으로는 더욱 정확한 의미를 알 수 있다.  
 
@@ -99,7 +99,7 @@ $$(L_{in}, h*d_v) \times (h*d_v, d_{model}) = (L_{in}, d_{model})$$
 
 
 
-##### A.5. Feed forward
+#### A.5. Feed forward
 
 Multi-head attention 이후 Add&Norm 레이어가 있다. ResNet 처럼 입력을 출력에 더해주는데 이것은 벡터(단어의 임베딩)의 순서 정보를 잊지 않기 위함이다. [Layer Normalization](https://arxiv.org/abs/1607.06450) 까지 적용후 feed forward net(FFN)을 통과하는데 이것은 단순히 Linear-ReLU-Linear 조합이다. 
 
@@ -109,23 +109,23 @@ FFN은 벡터(단어)별로 따로 적용된다. 같은 레이어에서 벡터 �
 
 
 
-##### A.6. Stack
+#### A.6. Stack
 
 인코더는 self-attention과 FFN이 결합된 하나의 인코더 레이어를 6번 쌓아 만든다. 인코더의 최종 출력만 디코더에 입력으로 들어간다. 인코더는 auto-regressive 하지 않기 때문에 출력이 입력으로 다시 들어가지 않고 병렬로 모든 입력 데이터를 처리한다.
 
 
 
-#### C. Decoder
+### C. Decoder
 
 디코더도 인코더와 비슷한데 세 가지 차이가 있다.
 
-##### C.1. Input
+#### C.1. Input
 
 인코더와 달리 디코더는 auto-regressive 하다. 이전의 출력이 현재의 입력으로 들어간다. 디코더의 첫 입력은 SoS (Start of Sentence)이고 이후 출력이 하나씩 붙어서 점점 입력 단어 수가 늘어난다. 계속 출력이 입력에 추가되다가 EoS (End of Sentence) 가 출력되면 중단된다.  
 
 
 
-##### C.2. First multi-head attention
+#### C.2. First multi-head attention
 
 디코더에서는 multi-head attention이 두 개 들어간다. 첫 번째는 **Masked** mutli-head attention 인데 'mask'는 "Scaled Dot-Product Attention" 그림에서 "Mask (opt.)"라고 된 블럭을 말한다. 디코더의 첫 번째 multi-head attention에서만 이 masking이 적용된다.  
 
@@ -135,7 +135,7 @@ FFN은 벡터(단어)별로 따로 적용된다. 같은 레이어에서 벡터 �
 
 
 
-##### C.3. Second multi-head attention
+#### C.3. Second multi-head attention
 
 두 번째 multi-head attention은 입력 구성이 다르다. 기존에는 하나의 입력이 세 갈래로 갈라지면서 Query, Key, Value가 됐다. 여기서는 인코더의 최종 출력이 Value, Key로 들어오고 첫 번째 attention의 출력은 Query로만 들어간다.  
 
@@ -143,7 +143,7 @@ FFN은 벡터(단어)별로 따로 적용된다. 같은 레이어에서 벡터 �
 
 
 
-#### D. Final Output
+### D. Final Output
 
 논문에서도 유툽, 블로그 등에서도 간단히 최종 출력은 Linear - Softmax로 다음 단어가 하나 나오고 끝나는 듯 말하지만 세부적인 내용을 숨기고 있다.  
 
@@ -153,7 +153,7 @@ FFN은 벡터(단어)별로 따로 적용된다. 같은 레이어에서 벡터 �
 
 
 
-### 1.2. Loss
+## 1.2. Loss
 
 딥러닝 논문이라면 자로고 Loss를 잘 설명해야 하거늘 이 논문에는 loss라는 단어가 아예 없다!  
 
