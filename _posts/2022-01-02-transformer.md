@@ -22,21 +22,22 @@ categories: research
 </colgroup>
 <thead>
 <tr class="header">
-<th>제목</th>
+<th>Title</th>
 <th>Attention Is All You Need</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td markdown="span">저자</td>
+<td markdown="span">Authos</td>
 <td markdown="span">Ashish Vaswani외 6명 (모두 Google Brain)</td>
 </tr>
 <tr>
-<td markdown="span">출판</td>
+<td markdown="span">Publisher</td>
 <td markdown="span">NIPS, 2017</td>
 </tr>
 </tbody>
 </table>
+
 > 주요 참고 자료: 허민석 <https://www.youtube.com/watch?v=mxGCEWOxfe8&list=PLVNY1HnUlO26qqZznHVWAqjS1fWw0zqnT>
 
 
@@ -53,7 +54,7 @@ categories: research
 
 ### A. Encoder
 
-#### A.1 Inputs
+#### A.1 Input
 
 'GNU', 'is', 'Not', 'Unix' 각각을 word2vec 같은 워드 임베딩을 통해 벡터로 만든다. 전체 입력의 길이를 $$L_{in}(=4)$$이라 한다. 입력을 하나씩 순서대로 임베딩 하는게 아니라 한번에 모두 임베딩을 계산해야 한다. 임베딩의 결과는 $$M (L_{in},d_{model})$$ 이다.  
 
@@ -158,6 +159,128 @@ FFN은 벡터(단어)별로 따로 적용된다. 같은 레이어에서 벡터 �
 딥러닝 논문이라면 자로고 Loss를 잘 설명해야 하거늘 이 논문에는 loss라는 단어가 아예 없다!  
 
 결과가 softmax로 나오므로 당연히 cross entropy loss를 쓸거라고 생각은 하지만... Loss와 관련된 내용은 label smoothing을 쓴다는 것 뿐이다.  
+
+
+
+
+
+# 2. DETR
+
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Title</th>
+<th>End-to-End Object Detection with Transformers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">Authors</td>
+<td markdown="span">Nicolas Carion 외 6명 (모두 Facebook AI)</td>
+</tr>
+<tr>
+<td markdown="span">Publisher</td>
+<td markdown="span">ECCV, 2020</td>
+</tr>
+<tr>
+<td markdown="span">github</td>
+<td markdown="span"> https://github.com/facebookresearch/detr </td>
+</tr>
+</tbody>
+</table>
+
+
+
+DETR 모델은 Transformer를 detection에 응용한 첫 논문이다. Transformer가 단순히 시계열 데이터 뿐만 아니라 영상에도 사용될 수 있음을 보여줬다. Detection에 Transformer를 사용하여 생기는 장점으로는 anchor 기반 box decoding이나 NMS (Non-Maxiumum Suppression) 같은 후처리 없이 바로 객체(class + bounding box)를 출력한다는 것이다. DETR은 정해진 $$N$$개의 객체를 출력하고 그 중에서 객체가 아닌 것들은 `no object`로 처리되어 실질적인 출력 객체 수를 조절할 수 있다.  
+
+
+
+## 2.1. Model Architecture
+
+![detr-architecture](../assets/transformer/detr-architecture.jpg)
+
+
+
+### A. Backbone
+
+이미지를 특징 벡터로 만들기 위해 CNN을 사용한다. 
+
+1. 입력: image, $$x_{img} \ (3, H_0, W_0)$$, 파이토치에서는 channel-first dimension 사용
+
+2. 출력: feature map, $$f \ (C, H, W), \ C=2048, \ H=H_0/32, \ W=W_0/32$$, 
+
+### B. Encoder
+
+feature map의 dimension이 너무 크기 때문에 1x1 convolution을 통해 채널을 $$d$$개로 줄인다. 이후 데이터 변형을 거쳐 $$HW$$ 개의 $$d$$ 차원 벡터를 인코더에 입력하여 같은 모양의 출력(임베딩)을 얻는다. 여기서는 feature map의 각 픽셀 데이터들이 sequence를 이루는 셈이다.
+
+1. conv: $$f \rightarrow z_0 \ (d,H,W), \ d \ll C$$
+2. reshape: $$z_0 \rightarrow z_1 \ (d, HW)$$
+3. permute: $$z_1 \rightarrow z \ (HW, d)$$
+3. encoder: $$z \rightarrow g \ (HW, d)$$
+
+실제 구현에서는 batch size까지 들어가서 2, 3이 다음과 같이 구현된다.
+
+1. `h` : $$(B,d,H,W)$$
+2. `h.flatten(2)` : $$(B,d,HW)$$
+3. `h.flatten(2).permute(2,0,1)` : $$(HW,B,d)$$
+
+인코더 구조 자체는 순서와 상관없기 때문에 (permutation-invariant) 순서를 알려주기 위한 positional encoding을 인코더 입력 직전에 더해준다. 자세한 구조는 아래 그림에 나와있다.  
+
+![detr-architecture-detail](../assets/transformer/detr-architecture-detail.png)
+
+### C. Decoder
+
+DETR의 디코더는 *Attention Is All You Need* 와는 다르게 auto-regressive 하지 않다. N개의 query를 처음에 한번에 입력해서 N개의 출력을 한번에 얻고 끝낸다. 코드에서 확인한 바로는 그림의 "Object queries"는 단순히 모양만 맞춘 zeros 행렬이다. 처음에는 zeros지만 attention 레이어에 들어가기전에 positional encoding이 더해지기 때문에 query 별로 다른 값을 가질 수 있다. 두 번째 디코더에서부터는 이전의 디코더 출력이 다음 디코더의 입력이 되므로 점점 의미를 더해갈 수 있다.  
+
+### D. FFN
+
+디코더 이후에 실제 detection 결과를 내기 위해 feed-forward network (FFN)을 통과한다. 최종 출력은 클래스와 박스 정보다. 클래스 예측을 위해 linear 레이어 하나를 쓰고 여기에 softmax를 적용하면 클래스 확률이 된다.  클래스에는 no obect가 포함된다.  
+
+박스 예측을 위해 linear-relu-linear-relu-linear 구조를 가진 FFN을 사용하고 여기에 sigmoid를 적용하면 박스의 (y,x,height,width)를 이미지에 대한 비율로 출력할 수 있다.  
+
+
+
+## 2.2. Loss
+
+### A. Bipartite Matching
+
+Loss를 계산하기 위해서는 우선 모델의 prediction set과 GT set을 매칭을 시켜야한다. DETR에서는 prediction과 GT를 1:1 매칭을 하는데 이를 **bipartite matching**이라고 표현한다. 매칭 방법은 Hungarian algorithm을 쓴다고 하는데 구현 방법은 모르겠지만 모든 매칭에 대한 손실의 합을 최소화하는 매칭 쌍을 찾는다고 한다. 각 GT 객체와 매칭되는 prediction 객체는 아래 식으로 구한다.
+
+![detr-loss-match1](../assets/transformer/detr-loss-match1.png)
+
+![detr-loss-match2](../assets/transformer/detr-loss-match2.png)  =  ![detr-loss-match3](../assets/transformer/detr-loss-match3.png)
+
+- $$y, \ \hat{y}$$ : GT and prediction object
+- $$\sigma(i)$$ : i번째 GT에 매칭되는 prediction index
+- $$b, \ \hat{b}$$ : GT and prediction bounding box
+- $$c_i$$ : GT class index
+- $$\hat{p}_{\sigma(i)}(c_i)$$ : $$\sigma(i)$$ 번째 prediction 객체에서 출력된 $$c_i$$ 번째 클래스의 확률
+
+매칭 Loss의 의미는 "매칭 쌍 사이의 box loss는 작아야하고 정답 클래스의 확률은 높아야 한다"는 것이다. 모든 매칭 쌍에 대해 매칭 loss의 합이 최소가 되는 1:1 매칭을 찾겠다는 것이다. GT와 매칭되는 prediction이 없으면 no object로 매칭이 된다.
+
+
+
+### B. Training Loss
+
+학습에 사용되는 loss는 클래스를 위한 cross-entropy loss와 box loss의 합이다. Box loss는 GIoU loss와 L1 loss의 조합이다.
+
+![detr-loss-hungarian](../assets/transformer/detr-loss-hungarian.png)
+
+![detr-loss-bbox1](../assets/transformer/detr-loss-bbox1.png)  =  ![detr-loss-bbox2](../assets/transformer/detr-loss-bbox2.png)
+
+
+
+
+
+
+
+
+
+
 
 
 
