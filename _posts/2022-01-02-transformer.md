@@ -96,6 +96,8 @@ Multi-head attention에서는 self-attention을 여러개 사용하는데 이건
 
 Multi-head attention에서는 $$d_v$$ 차원의 출력이 $$h$$개 나온다. 최종 출력은 입력과 같은 $$d_{model}$$ 이 되어야 하기 때문에 Multi-head의 결과물들을 concat하여 $$h * d_v$$ 차원의 행렬을 만들고 여기에 $$W^O (h*d_v,d_{model})$$을 곱하여 $$d_{model}$$ 차원의 벡터를 출력한다.  
 
+![transformer-multi-head-eq2](../assets/transformer/transformer-multi-head-eq2.png)
+
 $$(L_{in}, h*d_v) \times (h*d_v, d_{model}) = (L_{in}, d_{model})$$
 
 
@@ -271,6 +273,86 @@ Loss를 계산하기 위해서는 우선 모델의 prediction set과 GT set을 �
 ![detr-loss-hungarian](../assets/transformer/detr-loss-hungarian.png)
 
 ![detr-loss-bbox1](../assets/transformer/detr-loss-bbox1.png)  =  ![detr-loss-bbox2](../assets/transformer/detr-loss-bbox2.png)
+
+
+
+
+
+# 3. Deformable DETR
+
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Title</th>
+<th>DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">Authors</td>
+<td markdown="span">Xizhou Zhu 외 5명 (주로 SenseTime Research)</td>
+</tr>
+<tr>
+<td markdown="span">Publisher</td>
+<td markdown="span">ICLR, 2021</td>
+</tr>
+<tr>
+<td markdown="span">github</td>
+<td markdown="span"> https://github.com/fundamentalvision/Deformable-DETR </td>
+</tr>
+</tbody>
+</table>
+
+Deformable DETR은 기존 DETR의 두 가지 문제를 **deformable attention module**로 해결하였다.
+
+- 느린 수렴 속도: 500 epoch은 학습시켜야함 → 10배 감소
+- 많은 연산량, 메모리 필요: 픽셀 수 제곱 비례 → 선형 비례
+
+
+
+## 3.1. Deformable Attention Module
+
+기존 DETR의 문제는 encoder의 연산량에 있다. 이미지에서 $$HW$$개의 feature vector들이 만들어지고 이게 모두 Query, Key, Value로서 들어간다. 모양이 $$Q (HW,C), \ K(HW, C)$$ 이므로 $$QK^{T}$$만 해도 연산량이 $$O(H^2W^2C)$$가 된다. 연산량이 픽셀 수에 제곱에 비례하므로 고해상도 이미지, 혹은 feature map을 처리할 수 없고 따라서 작은 객체를 잡기가 어려워진다. CNN 기반 detector들이 multi-scale feature map을 써서 다양한 크기의 객체들을 검출하는데 DETR은 연산 시간이나 메모리의 벽에 막혀 고해상도 feature map을 처리할 수 없게 된다.  
+
+![deform-attention](../assets/transformer/deform-attention.png)
+
+
+
+Deformable attention은 Key, Value의 개수를 줄였다. 위 그림은 query feature vector 하나 $$\mathbf{z}_q$$를 처리하는 과정이다. $$\mathbf{z}_q$$의 feature map 좌표가 reference point $$\mathbf{p}_q$$ 이다.  
+
+$$\mathbf{p}_q$$에 어떤 객체가 있냐? 라는 query에 대답하기 위해 head에서는 $$\mathbf{p}_q$$ 근처의 점들을 $$K_0$$개 샘플링하여 key, value로 사용한다. (그림에서 $$K_0=3$$) 당연히 그래야 할 것 같지만 DETR에서는 $$\mathbf{p}_q$$에 있는 객체를 찾기 위해 모든 픽셀의 정보를 취합했다. Deformable attention에서는 $$QK^{T}$$의 연산량이 $$O(HWK_0C)$$ 이 된다. $$K_0 \ll HW$$이므로 DETR의 $$O(H^2W^2C)$$ 보다는 훨씬 줄어드는 것이다.
+
+단순히 연산량이 줄어든 것 뿐만 아니라 attetion의 방식 자체가 달라졌다. $$K_0$$개의 샘플들은 그림의 "Sampling Offsets" 박스에 나온대로 query에 linear 레이어를 적용하여 reference point에 대한 상대 좌표를 만들어낸다. 이 linear 레이어도 학습이 되므로 검출에 유리한 주변 점들의 위치를 학습하게 된다.  
+
+DETR의 attention 방식은 모든 픽셀에 일단 attention을 골고루 뿌려놓고 학습을 통해서 서서히 attention이 특정 픽셀들로 집중된다. 그래서 학습이 오래 걸린다.  
+
+Deformable DETR은 query와 관련된 픽셀을 상대적으로 적은 개수로 정해놓고 관련 픽셀의 위치를 학습하기 때문에 학습이 빠르게 진행될 수 있다.  
+
+
+
+## 3.2. Deformable Transformer
+
+![deform-transformer](../assets/transformer/deform-transformer.jpg)
+
+
+
+Deformable Transformer의 전체적인 모습은 위 그림과 같다. 기존 DETR에서 attention 모듈을 deformable attention로 바꾼것이다. 인코더의 self-attention과 디코더의 cross-attention은 deformable로 바꿨고 디코더의 self-attention은 기존 그대로 사용했다.  
+
+
+
+## 3.3. Additional Improvements
+
+#### A. Iterative Bounding Box Refinement
+
+Bounding box의 정확도를 높이기 위해 첫 디코더 레이어에서 box 출력을 하고 다음 레이어에서는 이전 레이어에서 출력된 box를 보정하는 것을 반복한다.  
+
+#### B. Two-Stage Deformable DETR
+
+인코더를 RPN(region proposal network)으로 쓰고 거기서 나온 proposal을 디코더의 object queries로 사용한다. 그런데 정확히 어떻게 인코더를 RPN으로 쓰는지는 모르겠다.  
 
 
 
