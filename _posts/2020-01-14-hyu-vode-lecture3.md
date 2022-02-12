@@ -1,8 +1,8 @@
 ---
 layout: post
 title:  "[HYU] Paper Reivew"
-date:   2020-01-12 09:00:03
-categories: HYU-Jan-2020
+date:   2020-01-14 09:00:03
+categories: HYU-Deep-Learning
 ---
 
 

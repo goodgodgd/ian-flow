@@ -2,7 +2,7 @@
 layout: post
 title:  "[HYU] Prerequisites for VODE"
 date:   2020-01-12 09:00:01
-categories: HYU-Jan-2020
+categories: HYU-Deep-Learning
 ---
 
 
@@ -565,5 +565,4 @@ $$
 ---
 
 여기까지 3차원 자세를 나타내는 다양한 방법에 대해서 알아봤습니다. 다음 시간에 배울 VODE에서도 저자마다 다른 표현 방식을 쓰는데 어떤 논문은 euler angle을 쓰고 어떤 논문은 twist coordinate을 쓰기도 합니다. 이러한 표현 방법을 정리해두면 VO/SLAM 관련 논문을 이해하는데 큰 도움이 됩니다.
-
 

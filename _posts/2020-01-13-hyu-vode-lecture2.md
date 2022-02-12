@@ -1,8 +1,8 @@
 ---
 layout: post
 title:  "[HYU] Understanding VODE"
-date:   2020-01-12 09:00:02
-categories: HYU-Jan-2020
+date:   2020-01-13 09:00:02
+categories: HYU-Deep-Learning
 ---
 
 
@@ -448,7 +448,6 @@ Bilinear interpolation을 하면 픽셀의 좌표와 픽셀의 값이 관계를 
 4. 모델의 출력이 조절되도록 DepthNet과 PoseNet의 파라미터들이 학습된다.
 
 이러한 과정이 수학적인 미분을 통해 photometric loss에서부터 모델의 파라미터까지 전파가 되어 두 개의 모델이 하나의 loss로부터 학습될 수 있습니다. 이러한 원리로 대량의 데이터에 대해 photometric loss를 줄이도록 학습하다보면 DL-VODE 모델이 실제에 가까운 depth와 pose를 출력하게 됩니다.
-
 
 
 

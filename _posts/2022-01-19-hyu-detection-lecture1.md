@@ -2,7 +2,7 @@
 layout: post
 title:  "[HYU 2022] Introduction to Object Detection"
 date:   2022-01-19 09:00:01
-categories: HYU-Jan-2022
+categories: HYU-Deep-Learning
 ---
 
 
@@ -15,9 +15,9 @@ categories: HYU-Jan-2022
    1. CNN Models: CNN을 활용한 다양한 응용 모델 설명
    2. Problem Definition: 분류, 검출, 분리 문제 정의
    3. Performance Metric: 검출 성능을 나타내는 지표 설명
-2. **Two-Stage Detectors**: Two-Stage Detector 모델들을 소개하고 실습해봅니다.
-3. **One-Stage Detectors**: One-Stage Detector 모델들을 소개하고 실습해봅니다.
-4. **Transformer-Based Detectors**: Transfomer 기반으로 구현된 Detector 모델들을 소개합니다.
+2. **Two-Stage Detectors**: Two-Stage Detector 모델들을 소개합니다.
+3. **One-Stage Detectors**: One-Stage Detector 모델들을 소개합니다.
+4. **Object Detection Practice**: Google Colab에서 객체 검출 모델을 실습해봅니다.
 
 이 강의를 통해서 여러분들이 배울 수 있는 것은 다음과 같습니다.
 
