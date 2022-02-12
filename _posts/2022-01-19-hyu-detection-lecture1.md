@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "[HYU 2022] Introduction to Object Detection"
+title:  "[HYU] Introduction to Object Detection"
 date:   2022-01-19 09:00:01
 categories: HYU-Deep-Learning
 ---

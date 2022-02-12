@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "[HYU 2022] Detector Practice"
+title:  "[HYU] Detector Practice"
 date:   2022-02-11 09:00:01
 categories: HYU-Deep-Learning
 ---
