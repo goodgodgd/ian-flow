@@ -9,7 +9,7 @@ categories: HYU-Deep-Learning
 
 # About This Lecture
 
-이 강의는 한양대학교 대학원생들을 대상으로 "Deep Learning based Object Detection(딥러닝 기반 객체 검출)"이라는 주제로 강의를 합니다. 강의 순서는 다음과 같습니다.
+이 강의는 "Deep Learning based Object Detection (딥러닝 기반 객체 검출)"이라는 주제로 강의를 합니다. 강의 순서는 다음과 같습니다.
 
 1. **Introduction to Object Detection**: Object Detection에 대한 전반적인 소개를 합니다.
    1. CNN Models: CNN을 활용한 다양한 응용 모델 설명

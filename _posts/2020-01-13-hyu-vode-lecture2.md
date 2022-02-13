@@ -9,7 +9,7 @@ categories: HYU-Deep-Learning
 
 # About This Lecture
 
-이 강의는 한양대학교 미래자동차공학부 학생들을 대상으로 "Deep Learning based Viusal Odometry and Depth Estimation" (DL-VODE, or simply VODE) 라는 주제로 강의를 합니다. 강의순서는 다음과 같습니다. 
+이 강의는 "Deep Learning based Viusal Odometry and Depth Estimation" (DL-VODE, or simply VODE) 라는 주제로 강의를 합니다. 강의순서는 다음과 같습니다. 
 
 1. **Prerequisites for VODE**: VODE를 이해하기 위한 사전지식을 공부합니다.
 3. **Understanding DL-VODE**: VODE의 학습 원리를 이해하고 핵심 과정을 실습합니다.
@@ -426,10 +426,13 @@ def reconstruct_image_roundup(pixel_coords, image, depth):
 
 DL-VODE를 학습시키기 위해서는 원래의 타겟 이미지와 소스 이미지로부터 합성된 타겟 이미지의 차이를 줄이도록 학습을 시켜야 합니다.
 
+
 $$
 photometric\_loss = \sum_i \left| I^{tgt}\left( \mathbf{p}^{tgt}_i \right) 
 - I^{src}\left( {1 \over Z^{src}} K T_{tgt \to src} Z^{tgt} K^{-1} \mathbf{p}^{tgt}_i \right) \right|
 $$
+
+
 photometric loss에서 학습이 가능한 부분은 PoseNet의 출력인 상대 포즈($$T_{src \to tgt}$$) 와 DepthNet의 출력인 깊이 이미지 ($$Z^{tgt}$$) 이고 나머지 변수들은 모두 상수 입니다. 이론적으로 두 값이 실제 값과 같으면 photometric loss가 0이 나와야 합니다. 그런데 픽셀 좌표와 픽셀의 이미지 값과는 사실 아무런 관계가 없습니다. 그러면 두 이미지 사이의 차이를 뺀 photometric loss가 상대 포즈나 깊이 이미지로 미분이 되지 않아서 학습이 안되어야 하는데 어떻게 학습을 하는 걸까요?  
 
 합성된 타겟 이미지, $$I^{src}\left( {1 \over Z^{src}} K T_{tgt \to src} Z^{tgt} K^{-1} \mathbf{p}^{tgt}_i \right)$$ 를 만들때 픽셀의 좌표, $$K T_{tgt \to src} Z^{tgt} K^{-1} \mathbf{p}^{tgt}_i$$ 가 정수가 나오지 않는데 픽셀의 좌표는 정수로만 입력할 수 있으므로 중간 픽셀 좌표에 해당하는 픽셀 값은 주변 픽셀 값들에 대한 중간 값 혹은 평균 값으로 계산해야 합니다. 이런걸 선형 보간(linear interpolation)이라고 하는데 픽셀 좌표가 1차원이 아니라 2차원이므로 두 방향으로 선형 보간을 하기 때문에 'bilinear interpolation'이라고 합니다.  

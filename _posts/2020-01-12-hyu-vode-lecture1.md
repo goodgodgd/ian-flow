@@ -9,7 +9,7 @@ categories: HYU-Deep-Learning
 
 # About This Lecture
 
-이 강의는 한양대학교 미래자동차공학부 학생들을 대상으로 "Deep Learning based Viusal Odometry and Depth Estimation" (DL-VODE, or simply VODE) 라는 주제로 강의를 합니다. 강의순서는 다음과 같습니다. 
+이 강의는 "Deep Learning based Viusal Odometry and Depth Estimation" (DL-VODE, or simply VODE) 라는 주제로 강의를 합니다. 강의순서는 다음과 같습니다. 
 
 1. **Prerequisites for VODE**: VODE를 이해하기 위한 사전지식을 공부합니다.
     1. What is VODE?
