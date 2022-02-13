@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "[HYU] Two-Stage Detectors"
+title:  "[HYU] One-Stage Detectors"
 date:   2022-02-08 09:00:01
 categories: HYU-Deep-Learning
 ---
