@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Transformer"
+title:  "Transformer for Computer Vision"
 date:   2022-01-02 09:00:03
 categories: research
 ---
@@ -356,13 +356,120 @@ Bounding box의 정확도를 높이기 위해 첫 디코더 레이어에서 box 
 
 
 
+# 4. Vision Transformer (ViT)
+
+
+
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Title</th>
+<th>AN IMAGE IS WORTH 16X16 WORDS:TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">Authors</td>
+<td markdown="span">Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, 외 8명 (Google Research)</td>
+</tr>
+<tr>
+<td markdown="span">Publisher</td>
+<td markdown="span">ICLR, 2021</td>
+</tr>
+<tr>
+<td markdown="span">github</td>
+<td markdown="span"> https://github.com/google-research/vision_transformer </td>
+</tr>
+</tbody>
+</table>
+
+ViT는 DETR과는 다르게 아예 CNN을 쓰지 않고 순수하게 Transformer 원형을 그대로 사용하여 **영상 분류**에 적용한 연구다. 일반적인 학습 방법으로는 Transformer가 기존의 CNN보다 좋은 성능을 내진 못 한다. Transformer에는 CNN과 다르게 **inductive bias**가 없기 때문이다. 여기서 inductive bias란 모델 구조에 내재되어있는 입력 데이터에 대한 사전 정보를 의미한다.  
+
+CNN은 영상의 채널을 가지는 2차원적 구조를 제대로 활용한 모델이다. 모든 위치에서 동일한 local 필터를 적용하기 때문에 의미 있는 객체가 어디에 있든 상관없이 찾을 수 있다.  
+
+하지만 transformer는 들어오는 모든 정보들 사이의 관계성을 추론하기 때문에 공간상으로 가까운 픽셀들 사이에 더 밀접한 관계가 있다는 것조차 학습해야 한다. 따라서 Transformer를 제대로 학습하기 위해서는 기존의 BERT나 GPT에서 하듯 초대량의 데이터로 사전 학습을 시킨 후 특정 task를 위한 fine-tuning을 해야 한다. 이 논문에서도 ImageNet 분류 문제에서 좋은 성능을 내기 위해 이보다 훨씬 큰 분류 데이터셋을 활용해 사전학습을 시켰다. 그랬더니 영상의 공간적인 구조까지 학습하게 되어 CNN보다 더 높은 분류 성능을 냈다는 결론이다. 이제 자세히 알아보자.
+
+
+
+## 4.1. Model Architecture
+
+
+
+![vision_transformer](../assets/transformer/vision_transformer.jpg)
+
+### A. Split into Patches
+
+Transformer를 영상에 적용할 때 가장 큰 문제는 영상을 Encoder에 입력하는 방법이다. Naive한 방식으로는 이미지를 1차원으로 펴서 픽셀을 하나씩 넣는 것이지만 ($$N=HW$$) 이는 transformer에서 입력 개수의 제곱에 비례하는 메모리와 연산이 들어가므로 극히 비효율적이다. DETR에서는 CNN backbone을 거쳐 feature map을 만들면 자연스럽게 해상도가 줄어들므로 이를 조금 완화했고 Deformable DETR에서는 attention의 범위를 고정된 크기로 줄여서 효율성을 크게 높였다.  
+
+ViT에서는 inductive bias를 최대한 배제하기 위해 이미지를 $$P \times P$$ 크기의 패치들로 쪼갠 뒤 각각의 패치를 1차원으로 펴서 linear projection을 시켜 일정 차원의 입력을 만든다. 패치의 해상도가 $$P \times P$$이면 영상은 $$N=HW/P^2$$ 개의 패치로 나뉘게 된다. (논문 제목은 마치 패치 수가 $$P \times P$$ 인것 같지만 이것은 각 패치의 해상도를 나타낸다.) 각각의 패치는 1차원으로 flatten 한 뒤 linear layer에 입력하여 $$D$$차원의 Input Embedding을 만든다. 논문에서 사용한 패치 크기는 $$P = 16$$ 이다.
+
+1. $$\mathbf{x} \ \ (H,W,C)$$ : input image
+2. $$\mathbf{x}_p \ \ (N, P^2C)$$ : image patches
+3. $$\mathbf{z}^i = \mathbf{x}_p^i \mathbf{E} \ \ (P^2C) \times (P^2C,D) = (D)$$ : linear projection 
+
+
+
+### B. Position Embedding
+
+영상이지만 Position embedding은 1차원적으로 생성한다. 그림에서 패치들을 일렬로 세워놓은 순서대로 Position Embedding을 생성하여 앞서 만든 Input Embedding에 더해서 Encoder에 입력한다. Position Embedding도 당연히 $$D$$ 차원 벡터다.
+
+![vit_eq1](../assets/transformer/vit_eq1.png)
+
+
+
+### C. Class Token
+
+Encoder의 맨 앞에 들어가는 embedding은 모델에서 수행할 작업을 나타내는 [class] 토큰이다. (만약 이 모델에서 classification외에 다른 작업을 동시에 학습한다면 그와 관련된 입력 토큰과 Head를 추가하면 된다.) [class] 토큰은 학습가능한 파라미터다. [class] 토큰에 해당하는 출력이 그림 속 "MLP Head"에 들어간다.  
 
 
 
 
+### D. Transformer
+
+ViT의 Transformer는 "Attention Is All You Need"에서 처음 발표된 Encoder 구조와 같다. 다음 수식으로 요약 가능하다.
+
+![vit_eq234](../assets/transformer/vit_eq234.png)
 
 
 
+### E. Head
+
+MLP Head는 단순히 Linear 레이어 하나로 구성되어있다. Encoder의 입력은 $$(N+1)$$개의 벡터 이므로 출력도 $$(N+1)$$개의 벡터가 나온다. 이 벡터들이 모두 Head에 들어가지 않고 앞서 말했다시피 [class] 토큰에 해당하는 첫 번째 출력(그림에서 가장 왼쪽)만 Head에 들어간다.
+
+Transformer는 global attention을 제공하므로 (영상 전체를 볼 수 있으므로) 이 [class] 토큰과 모든 영상 패치에서 나오는 embedding들이 섞여서 각 단계의 encoder 출력으로 나온다.
 
 
+
+## 4.2. Training
+
+### A. Pretraining
+
+Transformer는 영상의 2차원적, 국소적 특성에 대한 이해가 전혀 없으므로 대량의 데이터셋으로 사전 학습을 시켜야 좋은 성능을 낼 수 있다. **ImageNet**에서 좋은 성능을 내기 위해 **ImageNet-21k**나 **JFT**처럼 훨씬 더 큰 규모의 데이터셋으로 사전 학습을 시켰다.
+
+- Target task: "ImageNet" (ILSVRC-2012 ImageNet with 1k classes and 1.3M images)
+- Pretraining: "ImageNet-21k" (21k classes and 14M images), "JFT" (18k classes and 303M images)
+
+### B. Training Downstream Task
+
+사전 학습을 시킨 후에는 MLP Head를 제거하고 ImageNet으로 fine-tuning을 한다. 이렇게 사전학습된 모델을 작은 데이터셋에 적용하는 것을 Downstream Task라고 한다. 
+
+Fine-tuning을 할 때 사전학습 보다 더 고해상도 이미지로 학습하면 더 좋은 결과를 낼 수 있다고 한다. 그런데 여기서 해상도를 늘리면 패치의 개수가 늘어나게 된다. 늘어난 패치를 Transformer에 입력하는 것은 문제가 없으나 position encoding이 달라져야 하는 것이 문제다. 여기서는 사전학습에서 사용한 position encoding를 2차원 공간에서 bilinear interpolation해서 사용했다고 한다.
+
+
+
+## 4.3. Results
+
+Table 1은 모델의 규모인데 파라미터 규모가 대략 억단위다. 참고로 EfficientNet 모델들이 대략 천만 단위의 파라미터 수를 가진다.
+
+![vit_models](../assets/transformer/vit_models.png)
+
+
+
+Table 2는 CNN기반 모델(BiT-L, Noisy Student)과 비교해서 더 나은 결과를 냈다는 것을 보여준다.
+
+![vit_results](../assets/transformer/vit_results.png)
 
