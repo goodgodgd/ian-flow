@@ -473,3 +473,164 @@ Table 2는 CNN기반 모델(BiT-L, Noisy Student)과 비교해서 더 나은 결
 
 ![vit_results](../assets/transformer/vit_results.png)
 
+
+
+# 5. Data efficient image Transformers (DeiT)
+
+
+
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Title</th>
+<th>Training data-efficient image transformers & distillation through attention</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">Authors</td>
+<td markdown="span">Hugo Touvron,  Matthieu Cord 외 4명 (Facebook AI & Sorbonne University)</td>
+</tr>
+<tr>
+<td markdown="span">Publisher</td>
+<td markdown="span">ICML, 2021</td>
+</tr>
+<tr>
+<td markdown="span">github</td>
+<td markdown="span"> https://github.com/facebookresearch/deit </td>
+</tr>
+</tbody>
+</table>
+
+ViT가 transformer 구조를 이용해 기존 CNN을 뛰어넘는 성능을 보여주긴 했지만 사전학습을 위해 어마어마한 양의 데이터와 연산자원이 필요했다. ViT와 거의 같은 구조를 가지면서 부담스러운 사전학습 없이 ImageNet에서 SOTA를 찍은 논문이다. **모델 구조는 ViT와 거의 유사**한데 학습 방식을 개선하여 성능을 끌어올렸다. 
+
+핵심 개념은 Knowledge distillation 이다. ~~(지식 증류?)~~ Distillation에서는 대개 규모가 큰 고성능의 teacher 모델과 상대적으로 작은 student 모델이 있어서 teacher의 출력을 student가 따라하도록 학습시키는 방식이다. 잘 되면 student를 직접 GT label을 가지고 학습시키는 것보다 나은 성능을 낼 수 있다. Student가 teacher에 가까운 성능을 낸다면 이를 모델 압축 기술로도 볼 수 있다. 이것의 장점 중 하나는 mislabel을 스스로 수정하여 학습할 수 있다는 것이다. 라벨이 처음부터 잘못 들어갈수도 있고 data augmentation 과정에서 GT label의 객체가 사라질수도 있다. 그럴때 teacher 모델이 올바른 label을 알려주면 학습이 더 잘 될수도 있다.  
+
+**DeiT는 ViT 모델에 Distillation 기법을 적용했더니 적은 학습 데이터로도 transformer가 학습이 잘 됐다**는 내용이다.
+
+
+
+## 5.1. Model Architecture
+
+모델 구조는 ViT와 거의 비슷하다. 입력 이미지를 $$16 \times 16$$ 크기의 패치들로 잘라서 linear projection한 결과를 *patch token*으로 입력하고 클래스를 출력하기 위해 학습 가능한 *class token*도 입력한다. 
+
+![deit-architecture](../assets/transformer/deit-architecture.png)
+
+차이는 *distillation token*이 있고 이로부터 만들어진 출력을 teacher 모델로부터 학습시키는 용도로 쓴다는 것이다. class token의 출력은 GT label로 학습하고 distillation token의 출력은 teacher label로 학습한다. GT label로 학습할 때는 label smoothing 기법을 적용한다. Distillation을 할 때 teacher의 출력을 그대로 따라하는 soft distillation이 있고 분류 결과만을 학습하는 hard-label distillation이 있는데 hard-label의 성능이 더 좋다고 한다. Distillation에서는 label smoothing을 적용하지 않는다.
+
+
+
+## 5.2. Results
+
+DeiT에서는 다른 대량의 데이터셋으로 사전 학습을 하지 않고 타겟 데이터셋으로 직접 학습한다. 논문 첫 페이지에 나온 실험 결과는 아래와 같다. ImageNet Top-1 accuracy인데 갈색선은 Distillation을 적용하지 않은 것(ViT와 동일), 황색선은 EfficientNet, 옆에 증류 기호(?)가 붙은 빨간선은 Distillation을 적용한 모델이다. 가로축은 Throughput(초당 처리 이미지 수)이고, 세로축은 정확도니 오른쪽 위로 올라갈 수록 좋다. CNN 대표선수인 EfficientNet과 비교해보면 비슷한 throughput을 가진 모델 대비 정확도가 더 높게 나오는걸 볼 수 있다.
+
+ 
+
+![deit-result-graph](../assets/transformer/deit-result-graph.png)
+
+
+
+표 3은 Distillation의 효과를 보여준다. 위에서부터 6개 모델은 다음과 같다.
+
+1. no distillation: 그냥 ViT처럼 학습한 것
+2. usual distillation: GT label 없이 teacher 모델로 soft distilation 한 것
+3. usual distillation: GT label 없이 teacher 모델로 hard-label distilation 한 것 (여기까지 head는 하나)
+4. class embedding: Distillation 적용하고 class token 결과로 나온 class embedding 에서 나온 출력 평가
+5. distill. embedding: Distillation 적용하고 distil. token 결과로 나온 distil. embedding 에서 나온 출력 평가
+6. DeiT: class+distil.: Distillation 적용하고 두가지 head에서 나온 출력을 결합한 결과
+
+![deit-upgrades](../assets/transformer/deit-upgrades.png)
+
+표 3을 보면 2번에서 3번으로 넘어갈 때 가장 큰 성능 개선이 있다. GT label보다 teacher label이 더 학습에 효과적이라는 것이다.
+
+아래는 표 5번인데 여러 모델의 성능을 ImageNet, Real ImageNet, ImageNet V2 데이터셋으로 비교했다. EfficientNet과 비교했을때 파라미터 수는 조금 더 많지만 파라미터 수에 비해서는 빠르게 동작한다.
+
+![deit-performance](../assets/transformer/deit-performance.png)
+
+
+
+# 6. Swin Transformer
+
+<table>
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Title</th>
+<th>Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td markdown="span">Authors</td>
+<td markdown="span">Ze Liu, Yutong Lin, Yue Cao, Han Hu 외 4명 (Microsoft Reasearch Asia(MSRA))</td>
+</tr>
+<tr>
+<td markdown="span">Publisher</td>
+<td markdown="span">ICCV, 2021</td>
+</tr>
+<tr>
+<td markdown="span">github</td>
+<td markdown="span"> https://github.com/microsoft/Swin-Transformer </td>
+</tr>
+</tbody>
+</table>
+
+드디어 Swin Transformer까지 왔다. DETR은 CNN backbone을 쓴다는 찝찝함(?)이 남아있고 ViT나 DeiT는 classification만 되는 모델이라서 아쉬움이 남았다. Compution Vision 분야에서 아직도 가장 중요한 분야인 Detection이나 Segmentation에 Transformer만을 이용하여 SOTA 성능을 낸 게 바로 Swin-Transformer다. 최신 논문들의 성능은 이곳에서 비교해 볼 수 있다. COCO leadearboard는 최신 내용이 반영되지 않는것 같다.
+
+- Detection (COCO) : <https://paperswithcode.com/sota/object-detection-on-coco>
+- Segmentation (ADE20K) : <https://paperswithcode.com/sota/semantic-segmentation-on-ade20k-val>
+
+상위권 모델의 이름이나 설명에 **Swin**이라는 단어가 자주 눈에 띈다. 지금 소개할 Swin Transformer를 기반으로 만들었다는 뜻이다. Swin Transformer에서는 Transformer를 CNN처럼 feature map을 만드는 backbone으로 사용할 수 있게 했다. 이후 이 feature map을 이용하여 classification / detection /segmentation 등을 할 수 있는 것이다. 자세한 내용을 알아보자.  
+
+
+
+## 5.1. Model Architecture
+
+Swin Transformer(이하 Swin-T)의 가장 큰 혁신은 Transformer를 Window 별로 따로 적용하고 그걸 계층화하여 단계적으로 통합한 것이다. Transformer를 CNN처럼 피라미드 구조로 만들었다. Figure 1을 보면 모델 구조를 ViT와 비교하였다.
+
+![swin-hierarchy](../assets/transformer/swin-hierarchy.jpg)
+
+ViT의 문제점은 이미지 해상도에 제곱에 비례하는 연산량이다. 이미지 전체에 대해 attention을 계산하기 때문에 이미지 해상도가 $$H \times W$$ 이고 패치 크기가 $$16 \times 16$$이면 Transformer에 입력되는 패치의 개수는 $$N = H/16 \times W/16$$ 이 되고 attention 계산에는 $$N^2$$에 비례하는 연산량이 필요하게 된다. ViT는 classification만 하기 때문에 해상도를 그렇게 높일 필요가 없지만 dense prediction이 필요한 detection / segmentation의 경우에는 고해상도의 이미지를 처리할 경우가 많은데 ViT로는 답이 없게 된다.  
+
+그래서 Swin-T에서는 이미지 패치들을 하나의 Transformer에 한 번에 넣지 않고 window 별로 나눠서 처리한다. Window 크기가 정해지면 window 내부에서의 transformer 처리량은 동일하다. 이미지 해상도에 따라 달라지는 것은 window의 개수뿐이고 그것은 이미지 해상도(픽셀 수)에 비례한다. 그래서 Swin-T의 연산량은 이미지 해상도에 비례하고 이는 고해상도의 이미지를 처리하기가 수월해진다는 것이다.  
+
+이미지를 window 별로만 처리하면 전체적인 영상을 볼 수 없으므로 CNN 처럼 단계적으로 feature map 크기를 반씩 줄여나간다. 이렇게 하면 이미지 해상도 대비 1/4, 1/8, 1/16 크기의 feature map이 나오게 되고 여기에 detection head나 segmentation head를 붙이면 된다. 
+
+상세한 모델 구조는 Figure 3에 나와있다.  
+
+ ![swin-architecture](../assets/transformer/swin-architecture.png)
+
+
+
+1. Patch Partition: 이미지를 $$4 \times 4$$ 크기의 패치들로 분할한다.
+2. Linear Embedding: Linear 레이어를 통해 feature 생성
+3. Swin Transformer Block: Window 별로 따로 transformer 를 적용한다.
+4. Patch Merging: 입력된 feature map의 해상도를 1/2로 줄인다. Feature map에서 $$2 \times 2$$ 픽셀씩 묶어 4개의 feature vector(4C)를 하나로 묶고 linear 레이어를 통해 채널을 2C로 줄인다.
+
+
+
+## 6.2. Shifted Window
+
+위 구조의 단점은 window의 영역이 겹치지 않기 때문에 효율적이긴 하지만 window 사이의 관계를 모른다는 단점이 있다. 이를 보완하기 위해 window 분할 영역을 Figure 2처럼 움직여서 원래(왼쪽)의 window와는 다른 픽셀들과의 attention을 계산할 수 있게 했다. Figure 3 (b)처럼 Swin-T에서는 두 가지 분할 방식을 번갈아가며 사용한다. **W-MSA**가 정상적인 window 분할 상태에서의 multi-head self attention (MSA)이고 **SW-MSA**는 shifted window 상태에서 MSA를 적용한 것이다.
+
+
+
+ ![swin-shifted-window](../assets/transformer/swin-shifted-window.png)
+
+하지만 Figure 2의 오른쪽 그림처럼 분할시 window가 4개에서 9개가 되고 window 크기도 일정하지 않다는 단점이 있다. 그래서 가장 자리에 남은 자투리(?) window들을 모아서 원래 크기의 window를 만들면 기본 window 분할처럼 똑같은 크기의 4개의 window로써 처리할 수 있다.
+
+ ![swin-cyclic-shift](../assets/transformer/swin-cyclic-shift.png)
+
+
+
+Swin-T는 CNN backbone을 대체해서 쓸 수 있기 때문에 이 위에 FPN, PANet 등을 붙이면 detection / segmentation 예측을 출력할 수 있다. 이 논문에서 비교대상이 된 ViT 입장에서 보면 Swin-T는 영상에 대해  너무 많은 inductive bias를 가지고 있다. 사실상 CNN 구조에서 convolution 대신 attention mechanism을 넣은 것과 같다. 이미지의 2차원 적이고 계층적인 구조를 활용한 것이다. 하지만 논문은 역시 성능이 잘 나오는게 중요하다.
+
+
+
