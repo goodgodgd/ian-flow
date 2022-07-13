@@ -538,10 +538,10 @@ DeiT에서는 다른 대량의 데이터셋으로 사전 학습을 하지 않고
 
 1. no distillation: 그냥 ViT처럼 학습한 것
 2. usual distillation: GT label 없이 teacher 모델로 soft distilation 한 것
-3. usual distillation: GT label 없이 teacher 모델로 hard-label distilation 한 것 (여기까지 head는 하나)
-4. class embedding: Distillation 적용하고 class token 결과로 나온 class embedding 에서 나온 출력 평가
-5. distill. embedding: Distillation 적용하고 distil. token 결과로 나온 distil. embedding 에서 나온 출력 평가
-6. DeiT: class+distil.: Distillation 적용하고 두가지 head에서 나온 출력을 결합한 결과
+3. hard distillation: GT label 없이 teacher 모델로 hard-label distilation 한 것 (여기까지 head는 하나)
+4. class embedding: Distillation 적용하고 class embedding 에서 나온 출력 평가
+5. distill. embedding: Distillation 적용하고 distil. embedding 에서 나온 출력 평가
+6. DeiT: class+distil.: Distillation 적용하고 두 가지 embedding에서 나온 출력을 결합한 결과
 
 ![deit-upgrades](../assets/transformer/deit-upgrades.png)
 
@@ -582,7 +582,7 @@ DeiT에서는 다른 대량의 데이터셋으로 사전 학습을 하지 않고
 </tbody>
 </table>
 
-드디어 Swin Transformer까지 왔다. DETR은 CNN backbone을 쓴다는 찝찝함(?)이 남아있고 ViT나 DeiT는 classification만 되는 모델이라서 아쉬움이 남았다. Compution Vision 분야에서 아직도 가장 중요한 분야인 Detection이나 Segmentation에 Transformer만을 이용하여 SOTA 성능을 낸 게 바로 Swin-Transformer다. 최신 논문들의 성능은 이곳에서 비교해 볼 수 있다. COCO leadearboard는 최신 내용이 반영되지 않는것 같다.
+드디어 Swin Transformer까지 왔다. DETR은 CNN backbone을 쓴다는 찜찜함(?)이 남아있고 ViT나 DeiT는 classification만 되는 모델이라서 아쉬움이 남았다. Compution Vision 분야에서 아직도 가장 중요한 분야인 Detection이나 Segmentation에 Transformer만을 이용하여 SOTA 성능을 낸 게 바로 Swin-Transformer다. 최신 논문들의 성능은 이곳에서 비교해 볼 수 있다. COCO leadearboard는 최신 내용이 반영되지 않는것 같다.
 
 - Detection (COCO) : <https://paperswithcode.com/sota/object-detection-on-coco>
 - Segmentation (ADE20K) : <https://paperswithcode.com/sota/semantic-segmentation-on-ade20k-val>
@@ -599,7 +599,7 @@ Swin Transformer(이하 Swin-T)의 가장 큰 혁신은 Transformer를 Window �
 
 ViT의 문제점은 이미지 해상도에 제곱에 비례하는 연산량이다. 이미지 전체에 대해 attention을 계산하기 때문에 이미지 해상도가 $$H \times W$$ 이고 패치 크기가 $$16 \times 16$$이면 Transformer에 입력되는 패치의 개수는 $$N = H/16 \times W/16$$ 이 되고 attention 계산에는 $$N^2$$에 비례하는 연산량이 필요하게 된다. ViT는 classification만 하기 때문에 해상도를 그렇게 높일 필요가 없지만 dense prediction이 필요한 detection / segmentation의 경우에는 고해상도의 이미지를 처리할 경우가 많은데 ViT로는 답이 없게 된다.  
 
-그래서 Swin-T에서는 이미지 패치들을 하나의 Transformer에 한 번에 넣지 않고 window 별로 나눠서 처리한다. Window 크기가 정해지면 window 내부에서의 transformer 처리량은 동일하다. 이미지 해상도에 따라 달라지는 것은 window의 개수뿐이고 그것은 이미지 해상도(픽셀 수)에 비례한다. 그래서 Swin-T의 연산량은 이미지 해상도에 비례하고 이는 고해상도의 이미지를 처리하기가 수월해진다는 것이다.  
+그래서 Swin-T에서는 이미지 패치들을 하나의 Transformer에 한 번에 넣지 않고 window 별로 나눠서 처리한다. Window 크기가 정해지면 window 내부에서의 transformer 처리량은 동일하다. 이미지 해상도에 따라 달라지는 것은 window의 개수뿐이고 그것은 이미지 해상도(픽셀 수)에 비례한다. 그래서 Swin-T의 연산량은 이미지 해상도에 비례하고 이는 고해상도의 이미지를 처리하기가 수월해진다는 뜻이다.  
 
 이미지를 window 별로만 처리하면 전체적인 영상을 볼 수 없으므로 CNN 처럼 단계적으로 feature map 크기를 반씩 줄여나간다. 이렇게 하면 이미지 해상도 대비 1/4, 1/8, 1/16 크기의 feature map이 나오게 되고 여기에 detection head나 segmentation head를 붙이면 된다. 
 
@@ -612,13 +612,13 @@ ViT의 문제점은 이미지 해상도에 제곱에 비례하는 연산량이�
 1. Patch Partition: 이미지를 $$4 \times 4$$ 크기의 패치들로 분할한다.
 2. Linear Embedding: Linear 레이어를 통해 feature 생성
 3. Swin Transformer Block: Window 별로 따로 transformer 를 적용한다.
-4. Patch Merging: 입력된 feature map의 해상도를 1/2로 줄인다. Feature map에서 $$2 \times 2$$ 픽셀씩 묶어 4개의 feature vector(4C)를 하나로 묶고 linear 레이어를 통해 채널을 2C로 줄인다.
+4. Patch Merging: 입력된 feature map의 해상도를 1/2로 줄인다. Feature map에서 $$2 \times 2$$ 픽셀씩 묶어 4개의 feature vector를 하나로 concat하고 (4C) linear 레이어를 통해 채널을 반으로(2C) 줄인다. 결과적으로 채널 수가 2배로 늘어난다.
 
 
 
 ## 6.2. Shifted Window
 
-위 구조의 단점은 window의 영역이 겹치지 않기 때문에 효율적이긴 하지만 window 사이의 관계를 모른다는 단점이 있다. 이를 보완하기 위해 window 분할 영역을 Figure 2처럼 움직여서 원래(왼쪽)의 window와는 다른 픽셀들과의 attention을 계산할 수 있게 했다. Figure 3 (b)처럼 Swin-T에서는 두 가지 분할 방식을 번갈아가며 사용한다. **W-MSA**가 정상적인 window 분할 상태에서의 multi-head self attention (MSA)이고 **SW-MSA**는 shifted window 상태에서 MSA를 적용한 것이다.
+Windowed attention은 window끼리 영역이 겹치지 않기 때문에 효율적이긴 하지만 window 사이의 경계면에서의 정보가 부족하다는 단점이 있다. 이를 보완하기 위해 window 분할 영역을 Figure 2처럼 움직여서 (shifted window) 원래(왼쪽)의 window와는 다른 픽셀들과의 attention을 계산할 수 있게 했다. Figure 3 (b)처럼 Swin-T에서는 두 가지 분할 방식을 번갈아가며 사용한다. **W-MSA**가 정상적인 window 분할 상태에서의 multi-head self attention (MSA)이고 **SW-MSA**는 shifted window 상태에서 MSA를 적용한 것이다.
 
 
 
@@ -633,4 +633,22 @@ ViT의 문제점은 이미지 해상도에 제곱에 비례하는 연산량이�
 Swin-T는 CNN backbone을 대체해서 쓸 수 있기 때문에 이 위에 FPN, PANet 등을 붙이면 detection / segmentation 예측을 출력할 수 있다. 이 논문에서 비교대상이 된 ViT 입장에서 보면 Swin-T는 영상에 대해  너무 많은 inductive bias를 가지고 있다. 사실상 CNN 구조에서 convolution 대신 attention mechanism을 넣은 것과 같다. 이미지의 2차원 적이고 계층적인 구조를 활용한 것이다. 하지만 논문은 역시 성능이 잘 나오는게 중요하다.
 
 
+
+# 7. Why Transformer for Computer Vision?
+
+여기까지 정리하면서 느낀 점은 transformer 구조가 장점이 많고 computer vision에도 잘 어울린다는 것이다. 처음 *Attention is All You Need* 를 읽었을 때 들었던 여러가지 의구심들이 해소되었다. 
+
+### 이게 왜 좋을까?
+
+Transformer는 기존의 MLP, LSTM, CNN 보다 뭐가 나을까?  
+
+Transformer는 기본적으로 MLP에 기반한다. MLP는 원래 입력 데이터의 길이가 고정되어야 해서 다양한 길이의 입력 데이터를 처리하지 못하는 치명적인 단점이 있다. 그리고 고차원의 입력 데이터를 처리하기에는 너무 많은 파라미터와 연산이 필요해서 비효율적이다.  
+
+그래서 시계열 입력에는 LSTM, 2차원 영상 입력에는 CNN이 진리로 받아들여졌다. 둘 다 고정된 수의 파라미터로 다양한 길이의 입력을 처리할 수 있고 입력 길이에 비례하는 연산량을 가졌다.  
+
+Transformer는 MLP로 **유연성과 효율성**을 모두 만족하는 구조를 만들어냈다. Transformer에서는 학습가능한 파라미터의 수는 입력 데이터의 길이와는 아무 상관이 없다. Transfomer에서 학습 가능한 파라미터는 linear layer에만 있는데, 단일 linear layer가 모든 token이나 embedding에 대해 동일하게 적용된다. 마치 CNN처럼. Transformer를 linear가 아닌 conv 레이어로 구현할수도 있을것 같다. 그래서 linear layer에서는 입력 데이터 길이에 비례한 연산량이 들어간다. 다만 attention 연산과정에서 입력 데이터 길이의 **제곱**에 비례하는 연산이 들어가긴 한다.  
+
+이렇게 단점을 해결하고 나니 **장점**이 보인다. MLP는 모든 종류의 데이터를 처리할 수 있는 잠재력이 있다. 시계열이든 영상이든. MLP가 모든 입력 데이터를 한번에 연결하므로 성능 측면에서도 유리하다.  
+
+게다가 transformer에는 **attention**이 있다. 다양한 입력 토큰으로부터 나오는 이전 레이어의 value들을 관심(attention)있는 다른 value들과의 가중 평균으로 새로운 value들을 만들어낸다. Value들을 섞어놓고 다음 MLP에 입력으로 들어가 처리가 된다. 이러한 과정을 거치다보면 단순히 linear나 conv 레이어를 반복하는 것보다는 의미있는 것에 집중한 양질의 feature가 만들어질 것이라는 기대감이 생긴다.  
 
